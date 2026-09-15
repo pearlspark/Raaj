@@ -1,0 +1,6 @@
+{
+  "name": "API Shield & Gateway",
+  "description": "Production-grade API protection gateway, domain authorization firewall, real-time security monitor, and rate-limiting analytics platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

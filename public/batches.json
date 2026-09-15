@@ -1,0 +1,92 @@
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "634bd315ed7a360018558283",
+      "name": "Lakshya JEE 2027 - Physics, Chemistry & Mathematics",
+      "feeId": {
+        "total": 4500
+      },
+      "class": "12th",
+      "exam": "JEE Advanced",
+      "batchType": "PAID",
+      "startDate": "2026-04-01T00:00:00.000Z",
+      "endDate": "2027-04-30T00:00:00.000Z",
+      "previewImage": {
+        "baseUrl": "https://picsum.photos/seed/batch1/800/450",
+        "key": "batches/lakshya-jee.jpg"
+      },
+      "status": "ACTIVE",
+      "subjects": [
+        {
+          "_id": "subj_phys_001",
+          "subject": "Physics",
+          "imageUrl": "https://picsum.photos/seed/physics/300/300"
+        },
+        {
+          "_id": "subj_math_002",
+          "subject": "Mathematics",
+          "imageUrl": "https://picsum.photos/seed/math/300/300"
+        },
+        {
+          "_id": "subj_chem_003",
+          "subject": "Chemistry",
+          "imageUrl": "https://picsum.photos/seed/chem/300/300"
+        }
+      ]
+    },
+    {
+      "_id": "645cd426fe8b470029669394",
+      "name": "Yakeen NEET 2026 - Master Series",
+      "feeId": {
+        "total": 4200
+      },
+      "class": "Dropper",
+      "exam": "NEET UG",
+      "batchType": "PAID",
+      "startDate": "2026-05-15T00:00:00.000Z",
+      "endDate": "2027-05-01T00:00:00.000Z",
+      "previewImage": {
+        "baseUrl": "https://picsum.photos/seed/batch2/800/450",
+        "key": "batches/yakeen-neet.jpg"
+      },
+      "status": "ACTIVE",
+      "subjects": [
+        {
+          "_id": "subj_bio_004",
+          "subject": "Biology - Botany & Zoology",
+          "imageUrl": "https://picsum.photos/seed/biology/300/300"
+        },
+        {
+          "_id": "subj_chem_005",
+          "subject": "Organic Chemistry",
+          "imageUrl": "https://picsum.photos/seed/orgchem/300/300"
+        }
+      ]
+    },
+    {
+      "_id": "656de537af9c580030770405",
+      "name": "Arjuna JEE Foundation 2026",
+      "feeId": {
+        "total": 3999
+      },
+      "class": "11th",
+      "exam": "JEE Main",
+      "batchType": "PAID",
+      "startDate": "2026-06-01T00:00:00.000Z",
+      "endDate": "2027-04-15T00:00:00.000Z",
+      "previewImage": {
+        "baseUrl": "https://picsum.photos/seed/batch3/800/450",
+        "key": "batches/arjuna-jee.jpg"
+      },
+      "status": "ACTIVE",
+      "subjects": [
+        {
+          "_id": "subj_kinematics_006",
+          "subject": "Mechanics & Kinematics",
+          "imageUrl": "https://picsum.photos/seed/mechanics/300/300"
+        }
+      ]
+    }
+  ]
+}
