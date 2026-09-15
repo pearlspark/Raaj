@@ -10,8 +10,8 @@
       "clientSecretHash": "830332a113800d2a77fbeda20bae2fa77d4cb21977cbe6f67945b0168b0a39ab",
       "clientSecretPrefix": "sec_Kpwy...drVM",
       "rateLimitPerMin": 1000,
-      "totalRequests": 87434,
-      "successfulRequests": 86913,
+      "totalRequests": 87435,
+      "successfulRequests": 86914,
       "failedRequests": 521,
       "rateLimitViolations": 12,
       "lastIp": "::ffff:127.0.0.1",
@@ -27,7 +27,7 @@
         "curl/7.88.1"
       ],
       "lastEndpoint": "",
-      "lastActiveAt": "2026-09-15T12:52:06.631Z",
+      "lastActiveAt": "2026-09-15T12:52:30.919Z",
       "createdAt": "2026-09-01T12:17:41.736Z",
       "updatedAt": "2026-09-15T12:17:41.735Z"
     },
@@ -37,27 +37,28 @@
       "normalizedDomain": "localhost",
       "mode": "EXACT",
       "status": "ACTIVE",
-      "clientId": "client_a20873dd579e0e1fa9198896",
-      "clientSecretHash": "a1ab6506dfdffcac20d8777140884801b77bfcecfc1872adbd212d8c73c95965",
-      "clientSecretPrefix": "sec_pEj-...Mq7r",
+      "clientId": "client_c30ecac7d168e70d508abba6",
+      "clientSecretHash": "5d60650be38c1104ba1a1618b58d5204471bf46c95ca8fc5b8e0cb0e932670a4",
+      "clientSecretPrefix": "sec_V6CW...3Slm",
       "rateLimitPerMin": 500,
-      "totalRequests": 3414,
-      "successfulRequests": 3384,
+      "totalRequests": 3415,
+      "successfulRequests": 3385,
       "failedRequests": 30,
       "rateLimitViolations": 1,
-      "lastIp": "2401:4900:b4db:ca24:440f:e1ff:fea0:3a61",
+      "lastIp": "2401:4900:b4ef:3653:3ce3:27ff:fe4d:94db",
       "uniqueIps": [
         "127.0.0.1",
-        "2401:4900:b4db:ca24:440f:e1ff:fea0:3a61"
+        "2401:4900:b4db:ca24:440f:e1ff:fea0:3a61",
+        "2401:4900:b4ef:3653:3ce3:27ff:fe4d:94db"
       ],
       "uniqueUserAgents": [
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
         "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Mobile Safari/537.36"
       ],
       "lastEndpoint": "",
-      "lastActiveAt": "2026-09-15T12:35:19.777Z",
+      "lastActiveAt": "2026-09-15T13:22:06.602Z",
       "createdAt": "2026-09-08T12:17:41.736Z",
-      "updatedAt": "2026-09-15T12:17:41.735Z"
+      "updatedAt": "2026-09-15T13:55:05.254Z"
     },
     {
       "id": "dom_pirate_003",
@@ -86,6 +87,32 @@
       "lastActiveAt": "2026-09-15T10:17:41.736Z",
       "createdAt": "2026-09-12T12:17:41.736Z",
       "updatedAt": "2026-09-15T12:17:41.735Z"
+    },
+    {
+      "id": "dom_mu2qo00pqhoh",
+      "clientId": "client_33ad8e79e302fd123c50fd74",
+      "clientSecretHash": "b51db8a55b6b355b9a215a6c7e08351d0d901275ce57bb6470ff803c8ca8504e",
+      "clientSecretPrefix": "sec_yCmE...r9Xf",
+      "createdAt": "2026-09-15T14:00:02.329Z",
+      "domain": "http://localhost:3000",
+      "failedRequests": 0,
+      "lastEndpoint": "",
+      "lastIp": "106.192.188.170",
+      "mode": "SUBDOMAIN",
+      "normalizedDomain": "localhost",
+      "rateLimitPerMin": 120,
+      "rateLimitViolations": 0,
+      "status": "ACTIVE",
+      "successfulRequests": 1,
+      "totalRequests": 1,
+      "uniqueIps": [
+        "106.192.188.170"
+      ],
+      "uniqueUserAgents": [
+        "python-requests/2.34.2"
+      ],
+      "updatedAt": "2026-09-15T14:00:02.329Z",
+      "lastActiveAt": "2026-09-15T14:08:49.422Z"
     }
   ],
   "clients": [
@@ -127,9 +154,88 @@
       ],
       "createdAt": "2026-09-12T12:17:41.736Z",
       "lastUsedAt": "2026-09-15T10:17:41.736Z"
+    },
+    {
+      "clientId": "client_4610303f922bf426ea224bec",
+      "createdAt": "2026-09-08T12:17:41.736Z",
+      "domainId": "dom_local_002",
+      "domainName": "http://localhost:3000",
+      "lastUsedAt": "2026-09-15T12:17:41.735Z",
+      "name": "Local Dev / AI Studio Preview",
+      "permissions": [
+        "*"
+      ],
+      "status": "ACTIVE"
+    },
+    {
+      "clientId": "client_c30ecac7d168e70d508abba6",
+      "createdAt": "2026-09-08T12:17:41.736Z",
+      "domainId": "dom_local_002",
+      "domainName": "http://localhost:3000",
+      "lastUsedAt": "2026-09-15T12:17:41.735Z",
+      "name": "Local Dev / AI Studio Preview",
+      "permissions": [
+        "*"
+      ],
+      "status": "ACTIVE"
+    },
+    {
+      "clientId": "client_33ad8e79e302fd123c50fd74",
+      "createdAt": "2026-09-15T14:00:02.329Z",
+      "domainId": "dom_mu2qo00pqhoh",
+      "domainName": "http://localhost:3000",
+      "name": "Naam ",
+      "permissions": [
+        "*"
+      ],
+      "status": "ACTIVE"
     }
   ],
   "requestLogs": [
+    {
+      "id": "log_mu2svu1wsnk",
+      "requestId": "req_0af4aebe800ea9882939",
+      "timestamp": "2026-09-15T15:02:07.076Z",
+      "ip": "::ffff:127.0.0.1",
+      "country": "Unknown",
+      "region": "Global",
+      "city": "Internet",
+      "userAgent": "curl/7.88.1",
+      "origin": "https://example.com",
+      "referer": "",
+      "clientId": "client_2520d4e3d4271f6d37a010a1",
+      "domain": "example.com",
+      "endpoint": "",
+      "method": "GET",
+      "statusCode": 200,
+      "responseTimeMs": 969,
+      "responseSizeBytes": 450,
+      "riskScore": 15,
+      "riskFactors": [],
+      "blocked": false
+    },
+    {
+      "id": "log_mu2su0m61rv",
+      "requestId": "req_90758ffb439fd760b167",
+      "timestamp": "2026-09-15T15:00:42.270Z",
+      "ip": "::ffff:127.0.0.1",
+      "country": "Unknown",
+      "region": "Global",
+      "city": "Internet",
+      "userAgent": "curl/7.88.1",
+      "origin": "https://example.com",
+      "referer": "",
+      "clientId": "client_2520d4e3d4271f6d37a010a1",
+      "domain": "example.com",
+      "endpoint": "",
+      "method": "GET",
+      "statusCode": 200,
+      "responseTimeMs": 867,
+      "responseSizeBytes": 450,
+      "riskScore": 15,
+      "riskFactors": [],
+      "blocked": false
+    },
     {
       "id": "log_mu2o8r3r0iy",
       "requestId": "req_4aa522c329365e3da477",
@@ -1403,6 +1509,116 @@
       "admin": "admin",
       "action": "ADMIN_LOGIN_SUCCESS",
       "target": "system",
+      "ip": "::ffff:127.0.0.1",
+      "details": "Administrator logged into console via environment credentials",
+      "result": "SUCCESS",
+      "id": "aud_mu2ubwnbe93w",
+      "timestamp": "2026-09-15T15:42:36.551Z"
+    },
+    {
+      "admin": "admin",
+      "action": "ADMIN_LOGIN_SUCCESS",
+      "target": "system",
+      "ip": "::ffff:127.0.0.1",
+      "details": "Administrator logged into console via environment credentials",
+      "result": "SUCCESS",
+      "id": "aud_mu2ubse31g6c",
+      "timestamp": "2026-09-15T15:42:31.035Z"
+    },
+    {
+      "admin": "admin",
+      "action": "ADMIN_LOGIN_SUCCESS",
+      "target": "system",
+      "ip": "::ffff:127.0.0.1",
+      "details": "Administrator logged into console via environment credentials",
+      "result": "SUCCESS",
+      "id": "aud_mu2ubqiarhg5",
+      "timestamp": "2026-09-15T15:42:28.594Z"
+    },
+    {
+      "admin": "admin",
+      "action": "ADMIN_LOGIN_SUCCESS",
+      "target": "system",
+      "ip": "2401:4900:b4ef:3653:ac14:e2ff:fe53:d30b, 169.254.169.126",
+      "details": "Administrator logged into console",
+      "result": "SUCCESS",
+      "id": "aud_mu2u1m89an1w",
+      "timestamp": "2026-09-15T15:34:36.489Z"
+    },
+    {
+      "admin": "admin",
+      "action": "ADMIN_LOGIN_FAILED",
+      "target": "system",
+      "ip": "2401:4900:b4ef:3653:ac14:e2ff:fe53:d30b, 169.254.169.126",
+      "details": "Incorrect password entered",
+      "result": "FAILURE",
+      "id": "aud_mu2tz9oi5v57",
+      "timestamp": "2026-09-15T15:32:46.914Z"
+    },
+    {
+      "admin": "admin",
+      "action": "ADMIN_LOGIN_FAILED",
+      "target": "system",
+      "ip": "2401:4900:b4ef:3653:ac14:e2ff:fe53:d30b, 169.254.169.126",
+      "details": "Incorrect password entered",
+      "result": "FAILURE",
+      "id": "aud_mu2tz574iri0",
+      "timestamp": "2026-09-15T15:32:41.104Z"
+    },
+    {
+      "admin": "admin",
+      "action": "ADMIN_LOGIN_FAILED",
+      "target": "system",
+      "ip": "2401:4900:b4ef:3653:ac14:e2ff:fe53:d30b, 169.254.169.126",
+      "details": "Incorrect password entered",
+      "result": "FAILURE",
+      "id": "aud_mu2tz0ccpwt5",
+      "timestamp": "2026-09-15T15:32:34.812Z"
+    },
+    {
+      "admin": "r6N4u9w-5!IBVfV",
+      "action": "ADMIN_LOGIN_FAILED",
+      "target": "system",
+      "ip": "2401:4900:b4ef:3653:ac14:e2ff:fe53:d30b, 169.254.169.126",
+      "details": "Invalid username submitted",
+      "result": "FAILURE",
+      "id": "aud_mu2twuc49ebg",
+      "timestamp": "2026-09-15T15:30:53.716Z"
+    },
+    {
+      "admin": "r6N4u9w-5!IBVfV",
+      "action": "ADMIN_LOGIN_FAILED",
+      "target": "system",
+      "ip": "2401:4900:b4ef:3653:ac14:e2ff:fe53:d30b, 169.254.169.126",
+      "details": "Invalid username submitted",
+      "result": "FAILURE",
+      "id": "aud_mu2twtjbrg93",
+      "timestamp": "2026-09-15T15:30:52.679Z"
+    },
+    {
+      "admin": "spark",
+      "action": "ADMIN_LOGIN_FAILED",
+      "target": "system",
+      "ip": "2401:4900:b4ef:3653:ac14:e2ff:fe53:d30b, 169.254.169.126",
+      "details": "Invalid username submitted",
+      "result": "FAILURE",
+      "id": "aud_mu2tvqfewyi5",
+      "timestamp": "2026-09-15T15:30:01.994Z"
+    },
+    {
+      "admin": "admin",
+      "action": "ADMIN_LOGIN_SUCCESS",
+      "target": "system",
+      "ip": "2401:4900:b4ef:3653:ac14:e2ff:fe53:d30b, 169.254.169.126",
+      "details": "Administrator logged into console",
+      "result": "SUCCESS",
+      "id": "aud_mu2swgzibas9",
+      "timestamp": "2026-09-15T15:02:36.798Z"
+    },
+    {
+      "admin": "admin",
+      "action": "ADMIN_LOGIN_SUCCESS",
+      "target": "system",
       "ip": "2401:4900:b4ef:3653:341b:e1ff:fef5:3898, 169.254.169.126",
       "details": "Administrator logged into console",
       "result": "SUCCESS",
@@ -1498,17 +1714,17 @@
     "clockSkewSeconds": 300,
     "upstreamBaseUrl": "https://api.penpencil.co",
     "allowLocalhostTesting": true,
-    "updatedAt": "2026-09-15T12:52:17.491Z"
+    "updatedAt": "2026-09-15T15:43:10.694Z"
   },
   "adminUsers": [
     {
       "id": "usr_admin_001",
       "username": "admin",
-      "passwordHash": "bbee4e89a840cc6c43a128bc87667e78decd029b6958649e98b45de2a535ce1d902a6c77a421a8727aae24e0b218ce5a305285ee6d40a8c11bb9c2ba59471bb4",
-      "passwordSalt": "3074d6083d0eb844a54505658ff865c6",
+      "passwordHash": "",
+      "passwordSalt": "",
       "role": "SUPER_ADMIN",
       "createdAt": "2026-09-15T12:17:41.735Z",
-      "lastLoginAt": "2026-09-15T12:51:49.430Z"
+      "lastLoginAt": "2026-09-15T15:44:45.034Z"
     }
   ]
 }

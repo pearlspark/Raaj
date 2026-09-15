@@ -33,9 +33,9 @@ npm run start
 
 ### Administrator Portal Access
 - **URL**: `http://localhost:3000/` (or your deployed URL)
-- **Default Username**: `admin`
-- **Default Password**: `Admin@Shield2026!`
-*(Credentials and session secrets can be customized via environment variables or the Settings view).*
+- **Authentication**: Strict Environment Variable Enforcement
+- **Variables**: `ADMIN_USERNAME` and `ADMIN_PASSWORD` (configured in `.env` / environment)
+- **Security Baseline**: Zero hardcoded credentials in source code. Access is authenticated strictly against environment variables.
 
 ---
 

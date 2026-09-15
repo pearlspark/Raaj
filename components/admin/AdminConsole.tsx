@@ -112,13 +112,17 @@ export default function AdminConsole() {
   useEffect(() => {
     if (!isAuthenticated) return;
     const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
       fetch('/api/admin/stats')
-        .then((r) => r.json())
+        .then((r) => {
+          if (!r.ok) return null;
+          return r.json();
+        })
         .then((d) => {
-          if (d.metrics) setMetrics(d.metrics);
+          if (d?.metrics) setMetrics(d.metrics);
         })
         .catch(() => {});
-    }, 10000);
+    }, 60000);
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 

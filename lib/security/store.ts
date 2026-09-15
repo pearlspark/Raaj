@@ -240,9 +240,6 @@ class SecurityStore {
   }
 
   private createSeedData(): StoreData {
-    const defaultPassword = 'Admin@Shield2026!';
-    const { hash, salt } = hashAdminPassword(defaultPassword);
-
     const now = new Date();
     const nowIso = now.toISOString();
 
@@ -502,12 +499,13 @@ class SecurityStore {
       },
     ];
 
+    const configuredAdmin = process.env.ADMIN_USERNAME?.trim() || 'admin';
     const adminUsers = [
       {
         id: 'usr_admin_001',
-        username: 'admin',
-        passwordHash: hash,
-        passwordSalt: salt,
+        username: configuredAdmin,
+        passwordHash: '',
+        passwordSalt: '',
         role: 'SUPER_ADMIN',
         createdAt: nowIso,
         lastLoginAt: nowIso,
@@ -989,11 +987,22 @@ class SecurityStore {
   }
 
   public updateAdminLastLogin(username: string) {
-    const u = this.getAdminByUsername(username);
+    let u = this.getAdminByUsername(username);
     if (u) {
       u.lastLoginAt = new Date().toISOString();
-      this.saveData();
+    } else {
+      u = {
+        id: 'usr_admin_' + Date.now().toString(36),
+        username,
+        passwordHash: '',
+        passwordSalt: '',
+        role: 'SUPER_ADMIN',
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+      };
+      this.data.adminUsers.push(u);
     }
+    this.saveData();
   }
 
   // --- DASHBOARD AGGREGATED METRICS ---

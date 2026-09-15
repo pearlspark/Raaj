@@ -1,7 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { securityStore } from '@/lib/security/store';
-import { verifyAdminPassword } from '@/lib/security/crypto';
-import { issueAdminSessionToken, verifyAdminSession } from '@/lib/security/adminAuth';
+import { issueAdminSessionToken } from '@/lib/security/adminAuth';
+
+function constantTimeCompare(a: string, b: string): boolean {
+  try {
+    const bufA = Buffer.from(a, 'utf-8');
+    const bufB = Buffer.from(b, 'utf-8');
+    if (bufA.length !== bufB.length) {
+      // Execute dummy timing operation to maintain constant time
+      crypto.timingSafeEqual(bufB, bufB);
+      return false;
+    }
+    return crypto.timingSafeEqual(bufA, bufB);
+  } catch {
+    return false;
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,49 +26,53 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Username and password are required' }, { status: 400 });
     }
 
-    const admin = securityStore.getAdminByUsername(username);
-    if (!admin) {
+    const envAdminUsername = (process.env.ADMIN_USERNAME || 'admin').trim();
+    const envAdminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!envAdminPassword) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            'ADMIN_PASSWORD is not configured in environment variables (.env). For security, admin access requires ADMIN_PASSWORD configured in your environment settings.',
+        },
+        { status: 500 }
+      );
+    }
+
+    // Verify username and password against environment variables in constant time
+    const isUserValid = constantTimeCompare(username.trim().toLowerCase(), envAdminUsername.toLowerCase());
+    const isPassValid = constantTimeCompare(password, envAdminPassword);
+
+    if (!isUserValid || !isPassValid) {
       securityStore.addAuditLog({
         admin: username,
         action: 'ADMIN_LOGIN_FAILED',
         target: 'system',
         ip: req.headers.get('x-forwarded-for') || '127.0.0.1',
-        details: 'Invalid username submitted',
+        details: !isUserValid ? 'Invalid username submitted' : 'Incorrect password entered',
         result: 'FAILURE',
       });
       return NextResponse.json({ success: false, error: 'Invalid admin credentials' }, { status: 401 });
     }
 
-    const isValid = verifyAdminPassword(password, admin.passwordHash, admin.passwordSalt);
-    if (!isValid) {
-      securityStore.addAuditLog({
-        admin: username,
-        action: 'ADMIN_LOGIN_FAILED',
-        target: 'system',
-        ip: req.headers.get('x-forwarded-for') || '127.0.0.1',
-        details: 'Incorrect password entered',
-        result: 'FAILURE',
-      });
-      return NextResponse.json({ success: false, error: 'Invalid admin credentials' }, { status: 401 });
-    }
-
-    securityStore.updateAdminLastLogin(username);
-    const token = issueAdminSessionToken(username);
+    securityStore.updateAdminLastLogin(envAdminUsername);
+    const token = issueAdminSessionToken(envAdminUsername);
 
     securityStore.addAuditLog({
-      admin: username,
+      admin: envAdminUsername,
       action: 'ADMIN_LOGIN_SUCCESS',
       target: 'system',
       ip: req.headers.get('x-forwarded-for') || '127.0.0.1',
-      details: 'Administrator logged into console',
+      details: 'Administrator logged into console via environment credentials',
       result: 'SUCCESS',
     });
 
     const res = NextResponse.json({
       success: true,
       user: {
-        username: admin.username,
-        role: admin.role,
+        username: envAdminUsername,
+        role: 'SUPER_ADMIN',
       },
       token,
     });
