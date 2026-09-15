@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Shield, ShieldAlert, Activity, LogOut, Terminal, GraduationCap } from 'lucide-react';
+import { GlassShieldIcon } from '../ui/PremiumIcons';
+import { ShieldAlert, Activity, LogOut, Terminal, GraduationCap } from 'lucide-react';
 
 interface HeaderProps {
   activeTab: string;
@@ -19,77 +20,78 @@ export const Header: React.FC<HeaderProps> = ({
   metrics,
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 lg:px-6 py-3">
+    <header className="sticky top-0 z-40 liquid-glass border-b border-white/10 px-4 lg:px-7 py-3.5 backdrop-blur-2xl">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         {/* Brand & Status */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-sky-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-bold">
-            <Shield className="w-5 h-5 text-white" />
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl liquid-badge flex items-center justify-center relative group shadow-lg shadow-cyan-500/10">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-indigo-500/20 blur-sm" />
+            <GlassShieldIcon size={26} className="relative z-10 liquid-glow-cyan" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-100 tracking-tight text-base lg:text-lg">
-                API Shield <span className="text-sky-400 font-normal">& Gateway</span>
+            <div className="flex items-center gap-2.5">
+              <span className="font-bold text-white tracking-tight text-base lg:text-lg">
+                API Shield <span className="text-cyan-400 font-light">Enclave</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 shadow-[0_0_12px_rgba(16,185,129,0.2)]">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                ENFORCING
+                ACTIVE PROTECTION
               </span>
             </div>
-            <p className="text-xs text-slate-400 hidden sm:block">
-              Domain Whitelisting • HMAC Signing • Anti-Abuse Gateway
+            <p className="text-[11px] text-slate-400 hidden sm:block font-medium">
+              Zero-Trust Whitelist • Ed25519/HMAC Crypto • Anti-Scrape Layer
             </p>
           </div>
         </div>
 
         {/* Telemetry quick badges */}
         <div className="hidden md:flex items-center gap-3 text-xs">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300">
-            <Activity className="w-3.5 h-3.5 text-sky-400" />
-            <span>Traffic:</span>
-            <span className="font-semibold text-slate-100">{metrics?.requestsThisMinute ?? 0} req/min</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl liquid-glass-subtle text-slate-300">
+            <Activity className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-slate-400 text-[11px]">Throughput:</span>
+            <span className="font-semibold text-slate-100 font-mono text-xs">{metrics?.requestsThisMinute ?? 0} req/m</span>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-slate-300">
-            <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
-            <span>Threats Filtered:</span>
-            <span className="font-semibold text-amber-300">{metrics?.suspiciousRequests ?? 0}</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl liquid-glass-subtle text-slate-300">
+            <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
+            <span className="text-slate-400 text-[11px]">Shielded:</span>
+            <span className="font-semibold text-rose-300 font-mono text-xs">{metrics?.suspiciousRequests ?? 0}</span>
           </div>
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {/* Quick View Switcher: Admin Gateway vs Student App Preview */}
           <button
             onClick={() => setActiveTab(activeTab === 'edu-preview' ? 'overview' : 'edu-preview')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'edu-preview'
-                ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                ? 'liquid-btn-primary text-white'
+                : 'liquid-btn-glass text-slate-200'
             }`}
           >
             {activeTab === 'edu-preview' ? (
               <>
-                <Terminal className="w-3.5 h-3.5" />
+                <Terminal className="w-3.5 h-3.5 text-cyan-200" />
                 <span>Security Console</span>
               </>
             ) : (
               <>
-                <GraduationCap className="w-3.5 h-3.5 text-sky-400" />
-                <span>Student App Preview</span>
+                <GraduationCap className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Student Portal</span>
               </>
             )}
           </button>
 
           {/* Admin user info & Logout */}
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-            <span className="text-xs text-slate-300 font-medium hidden sm:inline-block">
+          <div className="flex items-center gap-2 pl-2.5 border-l border-white/10">
+            <span className="text-xs text-slate-300 font-mono font-medium hidden sm:inline-block px-2.5 py-1 rounded-lg liquid-glass-subtle">
               {adminUser?.username || 'admin'}
             </span>
             <button
               onClick={onLogout}
-              title="Logout from console"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+              title="Terminate Security Session"
+              className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>

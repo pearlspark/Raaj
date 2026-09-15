@@ -14,7 +14,8 @@ import { SettingsView } from './SettingsView';
 import { AuditLogsView } from './AuditLogsView';
 import { IntegrationGuide } from './IntegrationGuide';
 import { EduAppView } from '../player/EduAppView';
-import { Shield, Lock, User, Key, AlertTriangle, ArrowRight } from 'lucide-react';
+import { GlassShieldIcon, LiquidLockIcon } from '../ui/PremiumIcons';
+import { User, AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function AdminConsole() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -22,8 +23,8 @@ export default function AdminConsole() {
   const [activeTab, setActiveTab] = useState<string>('overview');
 
   // Login form state
-  const [loginUsername, setLoginUsername] = useState('admin');
-  const [loginPassword, setLoginPassword] = useState('Admin@Shield2026!');
+  const [loginUsername, setLoginUsername] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -180,85 +181,109 @@ export default function AdminConsole() {
   // Login Screen
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-4 relative overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="min-h-screen bg-[#070b16] flex flex-col justify-center items-center p-4 sm:p-6 relative overflow-hidden">
+        {/* Dynamic Liquid Ambient Light Auras */}
+        <div className="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 -right-20 w-[550px] h-[550px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-sky-500/10 rounded-full blur-[90px] pointer-events-none" />
 
-        <div className="w-full max-w-md bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl relative z-10 space-y-6">
-          <div className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-500 flex items-center justify-center mx-auto shadow-lg shadow-sky-500/25">
-              <Shield className="w-6 h-6 text-white" />
+        {/* Liquid Glass Login Shell */}
+        <div className="w-full max-w-md liquid-glass rounded-3xl p-8 sm:p-9 shadow-[0_24px_64px_rgba(0,0,0,0.7)] relative z-10 space-y-7">
+          {/* Header Brand */}
+          <div className="text-center space-y-3">
+            <div className="w-16 h-16 rounded-2xl liquid-badge flex items-center justify-center mx-auto shadow-2xl relative group">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-indigo-500/20 blur-md group-hover:blur-lg transition-all" />
+              <GlassShieldIcon size={34} className="relative z-10 liquid-glow-cyan" />
             </div>
-            <h1 className="text-xl font-bold text-white tracking-tight">
-              API Shield & Gateway Console
-            </h1>
-            <p className="text-xs text-slate-400">
-              Domain Authorization • Cryptographic Defense • Analytics
-            </p>
+
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold text-white tracking-tight flex items-center justify-center gap-2">
+                <span>Enterprise Gateway</span>
+              </h1>
+              <p className="text-xs text-slate-400 font-medium">
+                Cryptographic Access Enclave & Real-Time Traffic Defense
+              </p>
+            </div>
           </div>
 
           {loginError && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
+            <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 text-xs text-rose-300 flex items-center gap-2.5 backdrop-blur-md">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
               <span>{loginError}</span>
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4 text-xs">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Administrator Username</label>
+          <form onSubmit={handleLogin} className="space-y-5 text-xs">
+            <div className="space-y-1.5">
+              <label className="block text-slate-300 font-medium text-xs tracking-wide">
+                Administrator Identifier
+              </label>
               <div className="relative">
-                <User className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                <div className="absolute left-3.5 top-3 text-slate-400 pointer-events-none">
+                  <User className="w-4 h-4 text-cyan-400/70" />
+                </div>
                 <input
                   type="text"
                   required
+                  placeholder="admin username"
                   value={loginUsername}
                   onChange={(e) => setLoginUsername(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 text-xs font-mono"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl liquid-glass-input text-slate-100 placeholder-slate-500 text-xs font-mono transition-all"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Security Password</label>
+            <div className="space-y-1.5">
+              <label className="block text-slate-300 font-medium text-xs tracking-wide">
+                Security Password
+              </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+                <div className="absolute left-3.5 top-3 text-slate-400 pointer-events-none">
+                  <LiquidLockIcon size={16} className="text-cyan-400/70" />
+                </div>
                 <input
                   type="password"
                   required
+                  placeholder="••••••••••••"
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 text-xs font-mono"
+                  className="w-full pl-10 pr-4 py-3 rounded-2xl liquid-glass-input text-slate-100 placeholder-slate-500 text-xs font-mono transition-all"
                 />
               </div>
-            </div>
-
-            <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 text-[11px] text-slate-400">
-              <span className="text-slate-300 font-semibold">Pre-configured Admin:</span> <code className="text-sky-400">admin</code> / <code className="text-sky-400">Admin@Shield2026!</code>
             </div>
 
             <button
               type="submit"
               disabled={isLoggingIn}
-              className="w-full py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs transition-all shadow-md shadow-sky-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3.5 rounded-2xl liquid-btn-primary text-white font-semibold text-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2 cursor-pointer"
             >
               {isLoggingIn ? (
-                <span>Authenticating Gateway Session...</span>
+                <span>Verifying Security Enclave...</span>
               ) : (
                 <>
-                  <span>Sign In to Admin Console</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>Authenticate Session</span>
+                  <ArrowRight className="w-4 h-4 text-white/90" />
                 </>
               )}
             </button>
           </form>
+
+          {/* Secure Enclave Trust Notice */}
+          <div className="pt-2 border-t border-white/5 flex items-center justify-center gap-2 text-[11px] text-slate-400 font-medium">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span>Encrypted with TLS 1.3 & Argon2/SHA-256 HMAC Enclave</span>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#070b16] text-slate-100 flex flex-col font-sans relative selection:bg-cyan-500/30 selection:text-cyan-200">
+      {/* Background Liquid Light Orbs */}
+      <div className="fixed top-0 left-1/4 w-[600px] h-[350px] bg-cyan-600/10 rounded-full blur-[140px] pointer-events-none -z-10" />
+      <div className="fixed bottom-0 right-1/4 w-[500px] h-[350px] bg-indigo-600/10 rounded-full blur-[140px] pointer-events-none -z-10" />
+
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -267,7 +292,7 @@ export default function AdminConsole() {
         metrics={metrics}
       />
 
-      <div className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto">
+      <div className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto relative z-10">
         {activeTab !== 'edu-preview' && (
           <Sidebar
             activeTab={activeTab}

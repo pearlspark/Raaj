@@ -2,8 +2,12 @@
 
 import React, { useState } from 'react';
 import {
-  ShieldCheck,
-  ShieldAlert,
+  GlassShieldIcon,
+  PulseRadarIcon,
+  DefenseMatrixIcon,
+  QuantumCpuIcon,
+} from '../ui/PremiumIcons';
+import {
   Play,
   RotateCcw,
   CheckCircle2,
@@ -65,15 +69,15 @@ export const TestingSuite: React.FC = () => {
   const passedCount = tests.filter((t) => t.passed).length;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Header Banner */}
-      <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-6 rounded-3xl liquid-glass border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.5)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+          <h2 className="text-base font-bold text-white flex items-center gap-2.5 tracking-tight">
+            <GlassShieldIcon size={22} className="text-emerald-400" />
             Full 20-Point Gateway Security & Defense Testing Suite
           </h2>
-          <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+          <p className="text-xs text-slate-400 mt-1 max-w-2xl font-medium">
             Simulates authorized access, origin spoofing, token forgery, replay vectors, bot scrapers,
             and CORS bypass attempts against the security gateway engine.
           </p>
@@ -82,7 +86,7 @@ export const TestingSuite: React.FC = () => {
         <button
           onClick={runAllTests}
           disabled={isRunning}
-          className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 disabled:opacity-50 shrink-0"
+          className="px-5 py-2.5 rounded-2xl text-xs font-semibold liquid-btn-primary text-white transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 shrink-0 cursor-pointer"
         >
           {isRunning ? (
             <>
@@ -100,38 +104,39 @@ export const TestingSuite: React.FC = () => {
 
       {/* Summary Scorecard if run */}
       {summary && (
-        <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400 font-mono text-sm">
+        <div className="p-5 rounded-3xl liquid-glass border border-white/10 flex items-center justify-between shadow-xl">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl liquid-glass-subtle border border-emerald-500/30 flex items-center justify-center font-bold text-emerald-400 font-mono text-base shadow-inner">
               {passedCount}/{tests.length}
             </div>
             <div>
-              <div className="text-sm font-bold text-white">{summary}</div>
-              <div className="text-xs text-slate-400">
+              <div className="text-sm font-bold text-white tracking-tight">{summary}</div>
+              <div className="text-xs text-slate-400 mt-0.5">
                 100% of attack vectors successfully intercepted or verified against security baseline.
               </div>
             </div>
           </div>
-          <span className="hidden sm:inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <span className="hidden sm:inline-flex px-3.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             ALL CHECKS PASSED
           </span>
         </div>
       )}
 
       {/* Tests Grid / Table */}
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         {tests.length === 0 ? (
-          <div className="p-12 text-center rounded-xl border border-slate-800 bg-slate-900/40">
-            <Terminal className="w-8 h-8 text-sky-400/60 mx-auto mb-2" />
-            <p className="text-sm font-semibold text-slate-300">Security Suite Idle</p>
-            <p className="text-xs text-slate-500 mt-1 mb-4">
-              Click &quot;Execute All 20 Security Tests&quot; to benchmark and verify the gateway&apos;s defenses.
+          <div className="p-12 text-center rounded-3xl border border-white/10 liquid-glass">
+            <PulseRadarIcon size={40} className="text-cyan-400 mx-auto mb-3 opacity-70" />
+            <p className="text-sm font-semibold text-slate-200">Security Suite Idle</p>
+            <p className="text-xs text-slate-400 mt-1 mb-5 max-w-md mx-auto">
+              Click &quot;Execute All 20 Security Tests&quot; to benchmark and verify the gateway&apos;s cryptographic origin & token defenses.
             </p>
             <button
               onClick={runAllTests}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-sky-500 hover:bg-sky-400 text-white"
+              className="px-5 py-2.5 rounded-2xl text-xs font-semibold liquid-btn-primary text-white cursor-pointer shadow-lg inline-flex items-center gap-2"
             >
-              Start Diagnostic Run
+              <Play className="w-3.5 h-3.5 fill-white" />
+              <span>Start Diagnostic Run</span>
             </button>
           </div>
         ) : (
@@ -141,17 +146,17 @@ export const TestingSuite: React.FC = () => {
             return (
               <div
                 key={test.id}
-                className={`rounded-xl border transition-all ${
+                className={`rounded-2xl border transition-all ${
                   test.passed
-                    ? 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+                    ? 'liquid-glass border-white/10 hover:border-white/20'
                     : 'bg-rose-950/20 border-rose-500/40'
                 }`}
               >
                 <div
                   onClick={() => setExpandedId(isExpanded ? null : test.id)}
-                  className="p-3.5 flex items-center justify-between cursor-pointer"
+                  className="p-4 flex items-center justify-between cursor-pointer"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3.5">
                     {/* Pass/fail Icon */}
                     {test.passed ? (
                       <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
@@ -160,14 +165,14 @@ export const TestingSuite: React.FC = () => {
                     )}
 
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-bold text-slate-400">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-xs font-mono font-bold text-cyan-400">
                           #{test.id.toString().padStart(2, '0')}
                         </span>
                         <span className="text-xs sm:text-sm font-semibold text-white">
                           {test.name}
                         </span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700 hidden sm:inline-block">
+                        <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-semibold bg-white/5 text-slate-300 border border-white/10 hidden sm:inline-block">
                           {test.category}
                         </span>
                       </div>
@@ -200,25 +205,25 @@ export const TestingSuite: React.FC = () => {
 
                 {/* Expanded Details */}
                 {isExpanded && (
-                  <div className="px-4 pb-4 pt-2 border-t border-slate-800/80 bg-slate-950/50 space-y-2 text-xs">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono">
-                      <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-                        <span className="text-slate-500 block text-[10px]">EXPECTED OUTCOME</span>
+                  <div className="px-5 pb-5 pt-3 border-t border-white/10 liquid-glass-subtle space-y-3 text-xs rounded-b-2xl">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] font-mono">
+                      <div className="p-3 rounded-2xl liquid-glass border border-white/10">
+                        <span className="text-slate-400 block text-[10px] uppercase tracking-wider">EXPECTED OUTCOME</span>
                         <span className="text-white font-semibold">
                           HTTP {test.expectedStatus} ({test.expectedCode})
                         </span>
                       </div>
 
-                      <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-                        <span className="text-slate-500 block text-[10px]">ACTUAL GATEWAY RESPONSE</span>
+                      <div className="p-3 rounded-2xl liquid-glass border border-white/10">
+                        <span className="text-slate-400 block text-[10px] uppercase tracking-wider">ACTUAL GATEWAY RESPONSE</span>
                         <span className={test.passed ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold'}>
                           HTTP {test.actualStatus} ({test.actualCode})
                         </span>
                       </div>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-mono text-[11px]">
-                      <span className="text-slate-500 block text-[10px] mb-0.5">GATEWAY DIAGNOSTIC LOG</span>
+                    <div className="p-3.5 rounded-2xl liquid-glass border border-white/10 text-slate-300 font-mono text-[11px] leading-relaxed">
+                      <span className="text-cyan-400 block text-[10px] uppercase tracking-wider mb-1">GATEWAY DIAGNOSTIC LOG</span>
                       {test.diagnostics}
                     </div>
 
@@ -228,7 +233,7 @@ export const TestingSuite: React.FC = () => {
                           e.stopPropagation();
                           runSingleTest(test.id);
                         }}
-                        className="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-xl liquid-btn-glass text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer"
                       >
                         <RotateCcw className="w-3 h-3" /> Re-run Test #{test.id}
                       </button>

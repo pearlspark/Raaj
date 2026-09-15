@@ -32,8 +32,8 @@ export async function POST(req: NextRequest) {
     normalizedDomain: 'example.com',
     mode: 'SUBDOMAIN',
     status: 'ACTIVE',
-    clientId: 'client_demo_test',
-    clientSecretHash: 'demo_secret_hash',
+    clientId: 'client_enclave_prod',
+    clientSecretHash: 'sec_vault_hash_77a9b',
   };
 
   const results: SecurityTestCase[] = [];

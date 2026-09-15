@@ -2,7 +2,12 @@
 
 import React, { useState } from 'react';
 import {
-  Globe,
+  LiquidGlobeIcon,
+  CrystalKeyIcon,
+  GlassShieldIcon,
+  DefenseMatrixIcon,
+} from '../ui/PremiumIcons';
+import {
   Plus,
   Shield,
   Key,
@@ -147,22 +152,22 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Header & Add Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl liquid-glass border border-white/10 shadow-[0_16px_40px_rgba(0,0,0,0.5)]">
         <div>
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Globe className="w-4 h-4 text-sky-400" />
-            Authorized Domains & Client Whitelist
+          <h2 className="text-base font-bold text-white flex items-center gap-2.5 tracking-tight">
+            <LiquidGlobeIcon size={20} className="text-cyan-400" />
+            Authorized Domains & Client Enclaves
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Only explicit whitelisted domains and their corresponding issued API clients are permitted to consume the API.
+          <p className="text-xs text-slate-400 mt-1 font-medium">
+            Only explicit whitelisted domains and their corresponding cryptographically issued API clients are permitted to consume the API.
           </p>
         </div>
 
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-sky-500 hover:bg-sky-400 text-white transition-all shadow-md shadow-sky-500/20 flex items-center justify-center gap-1.5"
+          className="px-4 py-2.5 rounded-2xl text-xs font-semibold liquid-btn-primary text-white transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Authorize New Domain</span>
@@ -170,25 +175,25 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
       </div>
 
       {/* Domain Cards / Table */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
+      <div className="rounded-3xl border border-white/10 liquid-glass overflow-hidden shadow-[0_16px_40px_rgba(0,0,0,0.4)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-950/70 text-slate-400 border-b border-slate-800">
+            <thead className="liquid-glass-subtle text-slate-300 border-b border-white/10">
               <tr>
-                <th className="py-3 px-3.5 font-semibold">Status</th>
-                <th className="py-3 px-3.5 font-semibold">Authorized Domain</th>
-                <th className="py-3 px-3.5 font-semibold">Match Mode</th>
-                <th className="py-3 px-3.5 font-semibold">Rate Limit</th>
-                <th className="py-3 px-3.5 font-semibold">Client ID</th>
-                <th className="py-3 px-3.5 font-semibold">Last Active</th>
-                <th className="py-3 px-3.5 font-semibold text-right">Actions</th>
+                <th className="py-3.5 px-4 font-semibold tracking-wider uppercase text-[11px]">Status</th>
+                <th className="py-3.5 px-4 font-semibold tracking-wider uppercase text-[11px]">Authorized Domain</th>
+                <th className="py-3.5 px-4 font-semibold tracking-wider uppercase text-[11px]">Match Mode</th>
+                <th className="py-3.5 px-4 font-semibold tracking-wider uppercase text-[11px]">Rate Limit</th>
+                <th className="py-3.5 px-4 font-semibold tracking-wider uppercase text-[11px]">Client ID</th>
+                <th className="py-3.5 px-4 font-semibold tracking-wider uppercase text-[11px]">Last Active</th>
+                <th className="py-3.5 px-4 font-semibold tracking-wider uppercase text-[11px] text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-white/5">
               {domains.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-500">
-                    No domains authorized yet. Add your first domain above.
+                  <td colSpan={7} className="py-12 text-center text-slate-400 font-medium">
+                    No domains authorized yet. Click &apos;Authorize New Domain&apos; above.
                   </td>
                 </tr>
               ) : (
@@ -196,11 +201,11 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
                   const client = clients.find((c) => c.clientId === dom.clientId || c.domainId === dom.id);
 
                   return (
-                    <tr key={dom.id} className="hover:bg-slate-800/40 transition-colors">
+                    <tr key={dom.id} className="hover:bg-white/[0.03] transition-colors">
                       {/* Status */}
-                      <td className="py-3 px-3.5 whitespace-nowrap">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold ${
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                             dom.status === 'ACTIVE'
                               ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
                               : dom.status === 'DISABLED'
@@ -216,30 +221,30 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
                       </td>
 
                       {/* Domain */}
-                      <td className="py-3 px-3.5 font-mono">
-                        <div className="font-semibold text-white">{dom.domain}</div>
+                      <td className="py-3.5 px-4 font-mono">
+                        <div className="font-semibold text-white text-xs">{dom.domain}</div>
                         <div className="text-[10px] text-slate-400">normalized: {dom.normalizedDomain}</div>
                       </td>
 
                       {/* Match Mode */}
-                      <td className="py-3 px-3.5 whitespace-nowrap">
-                        <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-semibold text-[11px] text-slate-300">
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 font-semibold text-[11px] text-cyan-300">
                           {dom.mode === 'SUBDOMAIN' ? '*.subdomain' : 'exact'}
                         </span>
                       </td>
 
                       {/* Rate Limit */}
-                      <td className="py-3 px-3.5 text-slate-300 whitespace-nowrap">
-                        <span className="font-semibold text-white">{dom.rateLimitPerMin}</span> req/min
+                      <td className="py-3.5 px-4 text-slate-300 whitespace-nowrap">
+                        <span className="font-semibold text-white font-mono">{dom.rateLimitPerMin}</span> req/min
                       </td>
 
                       {/* Client ID */}
-                      <td className="py-3 px-3.5 font-mono text-[11px]">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sky-400 truncate max-w-[120px]">{dom.clientId}</span>
+                      <td className="py-3.5 px-4 font-mono text-[11px]">
+                        <div className="flex items-center gap-2">
+                          <span className="text-cyan-400 truncate max-w-[130px]">{dom.clientId}</span>
                           <button
                             onClick={() => handleCopy(dom.clientId, dom.id)}
-                            className="text-slate-500 hover:text-white"
+                            className="p-1 rounded-lg liquid-btn-glass text-slate-400 hover:text-white cursor-pointer"
                           >
                             {copiedKey === dom.id ? (
                               <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -251,18 +256,18 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
                       </td>
 
                       {/* Last Active */}
-                      <td className="py-3 px-3.5 text-slate-400 whitespace-nowrap text-[11px]">
-                        {dom.lastActiveAt ? new Date(dom.lastActiveAt).toLocaleString() : 'Never'}
+                      <td className="py-3.5 px-4 text-slate-400 whitespace-nowrap text-[11px] font-mono">
+                        {dom.lastActiveAt ? new Date(dom.lastActiveAt).toLocaleDateString() : 'Never'}
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3 px-3.5 text-right whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
                           {/* Status toggle */}
                           {dom.status === 'ACTIVE' ? (
                             <button
                               onClick={() => handleUpdateStatus(dom.id, 'DISABLED')}
-                              className="px-2 py-1 rounded bg-slate-800 hover:bg-amber-500/20 hover:text-amber-300 text-slate-400 text-[11px]"
+                              className="px-2.5 py-1 rounded-xl liquid-btn-glass text-slate-300 hover:text-amber-300 text-[11px] cursor-pointer"
                               title="Disable domain access"
                             >
                               Disable
@@ -270,7 +275,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
                           ) : (
                             <button
                               onClick={() => handleUpdateStatus(dom.id, 'ACTIVE')}
-                              className="px-2 py-1 rounded bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-300 text-slate-400 text-[11px]"
+                              className="px-2.5 py-1 rounded-xl liquid-btn-glass text-slate-300 hover:text-emerald-300 text-[11px] cursor-pointer"
                               title="Enable domain access"
                             >
                               Enable
@@ -280,7 +285,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
                           {/* Rotate secret */}
                           <button
                             onClick={() => handleRotateSecret(dom.id, dom.domain)}
-                            className="p-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white"
+                            className="p-1.5 rounded-xl liquid-btn-glass text-slate-300 hover:text-white cursor-pointer"
                             title="Rotate Client Secret"
                           >
                             <RefreshCw className="w-3.5 h-3.5" />
@@ -289,7 +294,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
                           {/* Delete */}
                           <button
                             onClick={() => handleDeleteDomain(dom.id, dom.domain)}
-                            className="p-1.5 rounded bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400"
+                            className="p-1.5 rounded-xl liquid-btn-glass text-slate-400 hover:text-rose-400 cursor-pointer"
                             title="Delete authorized domain"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -307,16 +312,16 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
 
       {/* Add Domain Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4">
+          <div className="w-full max-w-md liquid-glass border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Globe className="w-4 h-4 text-sky-400" />
+                <LiquidGlobeIcon size={18} className="text-cyan-400" />
                 Authorize New Domain
               </h3>
               <button
                 onClick={() => setIsAddModalOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="w-8 h-8 rounded-xl liquid-btn-glass text-slate-400 hover:text-white flex items-center justify-center cursor-pointer text-base"
               >
                 &times;
               </button>
@@ -340,9 +345,9 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
                   placeholder="https://example.com or example.com"
                   value={newDomain}
                   onChange={(e) => setNewDomain(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 font-mono text-xs"
+                  className="w-full px-3.5 py-2.5 rounded-2xl liquid-glass-input text-white focus:outline-none font-mono text-xs"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-slate-400 mt-1">
                   Scheme, port, and trailing slashes are automatically sanitized.
                 </p>
               </div>
@@ -356,7 +361,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
                   placeholder="e.g., Web Video Portal Production"
                   value={newClientName}
                   onChange={(e) => setNewClientName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 text-xs"
+                  className="w-full px-3.5 py-2.5 rounded-2xl liquid-glass-input text-white focus:outline-none text-xs"
                 />
               </div>
 
@@ -366,7 +371,7 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
                   <select
                     value={newMode}
                     onChange={(e: any) => setNewMode(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 text-xs"
+                    className="w-full px-3.5 py-2.5 rounded-2xl liquid-glass-input text-white focus:outline-none text-xs bg-slate-900"
                   >
                     <option value="SUBDOMAIN">Subdomain & Apex (*.domain.com)</option>
                     <option value="EXACT">Exact Match Only</option>
@@ -383,23 +388,23 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
                     max={10000}
                     value={newRateLimit}
                     onChange={(e) => setNewRateLimit(parseInt(e.target.value, 10))}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-sky-500 text-xs font-mono"
+                    className="w-full px-3.5 py-2.5 rounded-2xl liquid-glass-input text-white focus:outline-none text-xs font-mono"
                   />
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-white/10 flex items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold"
+                  className="px-4 py-2.5 rounded-2xl liquid-btn-glass text-slate-300 font-semibold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-2xl liquid-btn-primary text-white font-semibold flex items-center gap-1.5 disabled:opacity-50 cursor-pointer shadow-lg"
                 >
                   {isSubmitting ? 'Registering...' : 'Authorize Domain'}
                 </button>
@@ -411,10 +416,10 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
 
       {/* One-time Secret Disclosure Modal */}
       {oneTimeSecretModal?.isOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-slate-900 border border-amber-500/40 rounded-2xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
-              <Lock className="w-5 h-5 text-amber-400" />
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-xl flex items-center justify-center p-4">
+          <div className="w-full max-w-lg liquid-glass border border-amber-500/40 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-2.5 text-amber-400 font-bold text-sm">
+              <CrystalKeyIcon size={20} className="text-amber-400" />
               <span>Save Client Credentials Now (Shown Only Once)</span>
             </div>
 
@@ -424,13 +429,13 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
             </p>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                <div className="text-[11px] text-slate-400 font-semibold mb-1">CLIENT ID</div>
-                <div className="flex items-center justify-between font-mono text-sky-400">
+              <div className="p-3.5 rounded-2xl liquid-glass-subtle border border-white/10">
+                <div className="text-[10px] text-slate-400 font-semibold mb-1 uppercase tracking-wider">CLIENT ID</div>
+                <div className="flex items-center justify-between font-mono text-cyan-400">
                   <span className="break-all">{oneTimeSecretModal.clientId}</span>
                   <button
                     onClick={() => handleCopy(oneTimeSecretModal.clientId, 'modal-client-id')}
-                    className="ml-2 p-1 rounded bg-slate-800 hover:text-white"
+                    className="ml-2 p-1.5 rounded-xl liquid-btn-glass text-slate-300 hover:text-white cursor-pointer"
                   >
                     {copiedKey === 'modal-client-id' ? (
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -441,13 +446,13 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-950 border border-amber-500/30">
-                <div className="text-[11px] text-amber-400 font-semibold mb-1">CLIENT SECRET (RAW)</div>
+              <div className="p-3.5 rounded-2xl liquid-glass-subtle border border-amber-500/30">
+                <div className="text-[10px] text-amber-400 font-semibold mb-1 uppercase tracking-wider">CLIENT SECRET (RAW)</div>
                 <div className="flex items-center justify-between font-mono text-emerald-400">
                   <span className="break-all">{oneTimeSecretModal.rawSecret}</span>
                   <button
                     onClick={() => handleCopy(oneTimeSecretModal.rawSecret, 'modal-secret')}
-                    className="ml-2 p-1 rounded bg-slate-800 hover:text-white"
+                    className="ml-2 p-1.5 rounded-xl liquid-btn-glass text-slate-300 hover:text-white cursor-pointer"
                   >
                     {copiedKey === 'modal-secret' ? (
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -459,14 +464,14 @@ export const DomainManager: React.FC<DomainManagerProps> = ({ domains, clients, 
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300">
+            <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300">
               ⚠️ Copy both keys into your client environment or secure vault. Once you close this modal, the secret cannot be recovered.
             </div>
 
             <div className="pt-2 flex justify-end">
               <button
                 onClick={() => setOneTimeSecretModal(null)}
-                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all shadow-md shadow-emerald-600/20"
+                className="px-5 py-2.5 rounded-2xl liquid-btn-primary text-white font-semibold text-xs transition-all shadow-lg cursor-pointer"
               >
                 I Have Safely Saved These Credentials
               </button>

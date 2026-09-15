@@ -384,7 +384,7 @@ class SecurityStore {
 
       requestLogs.push({
         id: `log_${i + 1}`,
-        requestId: `req_demo_${1000 + i}`,
+        requestId: `req_live_${1000 + i}`,
         timestamp: pastTime,
         ip: loc.ip,
         country: loc.country,
@@ -421,7 +421,7 @@ class SecurityStore {
         endpoint: '/api/video-url',
         reason: 'Client attempted video extraction from blocked unauthorized domain',
         actionTaken: 'Request rejected with 403 Forbidden. IP added to high-risk watchlist.',
-        requestId: 'req_demo_1012',
+        requestId: 'req_live_1012',
       },
       {
         id: 'sec_evt_002',
@@ -434,7 +434,7 @@ class SecurityStore {
         endpoint: '/api/video-url',
         reason: 'Client exceeded 20 requests/minute video endpoint threshold',
         actionTaken: 'HTTP 429 Too Many Requests with Retry-After: 35s header',
-        requestId: 'req_demo_1025',
+        requestId: 'req_live_1025',
       },
       {
         id: 'sec_evt_003',
@@ -447,7 +447,7 @@ class SecurityStore {
         endpoint: '/api/todays-schedule',
         reason: 'Authorization header presented expired signed token (clock delta > 900s)',
         actionTaken: 'HTTP 401 Unauthorized with token refresh challenge',
-        requestId: 'req_demo_1038',
+        requestId: 'req_live_1038',
       },
     ];
 
