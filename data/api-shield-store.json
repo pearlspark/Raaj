@@ -1506,6 +1506,46 @@
   ],
   "auditLogs": [
     {
+      "admin": "LegaMeraBSDK",
+      "action": "ADMIN_LOGIN_SUCCESS",
+      "target": "system",
+      "ip": "::ffff:127.0.0.1",
+      "details": "Administrator logged into console via environment credentials",
+      "result": "SUCCESS",
+      "id": "aud_mu2ujmq56x6z",
+      "timestamp": "2026-09-15T15:48:36.941Z"
+    },
+    {
+      "admin": "admin",
+      "action": "ADMIN_LOGIN_FAILED",
+      "target": "system",
+      "ip": "::ffff:127.0.0.1",
+      "details": "Invalid username submitted",
+      "result": "FAILURE",
+      "id": "aud_mu2ujg1h8w1q",
+      "timestamp": "2026-09-15T15:48:28.277Z"
+    },
+    {
+      "admin": "admin",
+      "action": "ADMIN_LOGIN_FAILED",
+      "target": "system",
+      "ip": "::ffff:127.0.0.1",
+      "details": "Incorrect password entered",
+      "result": "FAILURE",
+      "id": "aud_mu2ueqr7bjvt",
+      "timestamp": "2026-09-15T15:44:48.883Z"
+    },
+    {
+      "admin": "admin",
+      "action": "ADMIN_LOGIN_SUCCESS",
+      "target": "system",
+      "ip": "::ffff:127.0.0.1",
+      "details": "Administrator logged into console via environment credentials",
+      "result": "SUCCESS",
+      "id": "aud_mu2uenscg8vy",
+      "timestamp": "2026-09-15T15:44:45.036Z"
+    },
+    {
       "admin": "admin",
       "action": "ADMIN_LOGIN_SUCCESS",
       "target": "system",
@@ -1714,7 +1754,7 @@
     "clockSkewSeconds": 300,
     "upstreamBaseUrl": "https://api.penpencil.co",
     "allowLocalhostTesting": true,
-    "updatedAt": "2026-09-15T15:43:10.694Z"
+    "updatedAt": "2026-09-15T15:48:43.220Z"
   },
   "adminUsers": [
     {
@@ -1725,6 +1765,15 @@
       "role": "SUPER_ADMIN",
       "createdAt": "2026-09-15T12:17:41.735Z",
       "lastLoginAt": "2026-09-15T15:44:45.034Z"
+    },
+    {
+      "id": "usr_admin_mu2ujmq4",
+      "username": "LegaMeraBSDK",
+      "passwordHash": "",
+      "passwordSalt": "",
+      "role": "SUPER_ADMIN",
+      "createdAt": "2026-09-15T15:48:36.940Z",
+      "lastLoginAt": "2026-09-15T15:50:13.702Z"
     }
   ]
 }

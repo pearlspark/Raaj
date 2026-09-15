@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useSyncExternalStore } from 'react';
 import {
   GlassShieldIcon,
   CrystalKeyIcon,
@@ -474,7 +474,17 @@ const API_ENDPOINTS: ApiEndpointDef[] = [
   },
 ];
 
+const emptySubscribe = () => () => {};
+function useOrigin(): string {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => (typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com'),
+    () => 'https://your-domain.com'
+  );
+}
+
 export const IntegrationGuide: React.FC = () => {
+  const origin = useOrigin();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedEndpoint, setSelectedEndpoint] = useState<ApiEndpointDef>(API_ENDPOINTS[0]);
@@ -499,7 +509,6 @@ export const IntegrationGuide: React.FC = () => {
   };
 
   const generateCodeSnippet = (ep: ApiEndpointDef, lang: 'browser' | 'curl' | 'node' | 'python') => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com';
     const queryParams = ep.params
       .filter((p) => !p.type.includes('Body'))
       .map((p) => `${p.name}=${encodeURIComponent(p.example)}`)
