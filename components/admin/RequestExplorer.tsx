@@ -13,6 +13,7 @@ import {
   XCircle,
   AlertTriangle,
   FileSpreadsheet,
+  Trash2,
 } from 'lucide-react';
 import { RequestLog } from '@/lib/security/types';
 
@@ -25,6 +26,27 @@ export const RequestExplorer: React.FC = () => {
   const [statusCode, setStatusCode] = useState<string>('');
   const [riskLevel, setRiskLevel] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isCleaning, setIsCleaning] = useState(false);
+  const [showCleanConfirm, setShowCleanConfirm] = useState(false);
+  const [cleanSuccess, setCleanSuccess] = useState(false);
+
+  const handleCleanLogs = async () => {
+    setIsCleaning(true);
+    try {
+      const res = await fetch('/api/admin/requests', { method: 'DELETE' });
+      if (res.ok) {
+        setLogs([]);
+        setTotal(0);
+        setShowCleanConfirm(false);
+        setCleanSuccess(true);
+        setTimeout(() => setCleanSuccess(false), 4000);
+      }
+    } catch (e) {
+      console.error('Failed to clean logs:', e);
+    } finally {
+      setIsCleaning(false);
+    }
+  };
 
   useEffect(() => {
     let ignore = false;
@@ -93,13 +115,55 @@ export const RequestExplorer: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleExportCsv}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Download className="w-3.5 h-3.5 text-sky-400" />
               <span>Export CSV</span>
             </button>
+            <button
+              onClick={() => setShowCleanConfirm(true)}
+              disabled={total === 0 || isCleaning}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-1.5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{isCleaning ? 'Cleaning...' : 'Clean Logs'}</span>
+            </button>
           </div>
         </div>
+
+        {cleanSuccess && (
+          <div className="p-3 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>All telemetry request logs have been successfully cleaned and purged.</span>
+          </div>
+        )}
+
+        {showCleanConfirm && (
+          <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-200 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+              <span>Are you sure you want to clean all stored request logs? This cannot be undone.</span>
+            </div>
+            <div className="flex items-center gap-2 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setShowCleanConfirm(false)}
+                className="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleCleanLogs}
+                disabled={isCleaning}
+                className="px-3 py-1 rounded-md text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white transition cursor-pointer flex items-center gap-1"
+              >
+                <Trash2 className="w-3 h-3" />
+                <span>{isCleaning ? 'Cleaning...' : 'Yes, Clean All'}</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Filter Bar */}
         <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 text-xs">

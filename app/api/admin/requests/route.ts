@@ -76,3 +76,16 @@ export async function GET(req: NextRequest) {
     ...result,
   });
 }
+
+export async function DELETE(req: NextRequest) {
+  const session = verifyAdminSession(req);
+  if (!session.valid) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
+  securityStore.clearRequestLogs();
+  return NextResponse.json({
+    success: true,
+    message: 'Request logs cleaned successfully.',
+  });
+}

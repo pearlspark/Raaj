@@ -10,6 +10,7 @@ import {
   Clock,
   ExternalLink,
   ShieldCheck,
+  Trash2,
 } from 'lucide-react';
 import { SecurityEvent } from '@/lib/security/types';
 
@@ -21,6 +22,21 @@ interface SecurityEventsProps {
 
 export const SecurityEvents: React.FC<SecurityEventsProps> = ({ events, onRefresh, onBlockIp }) => {
   const [severityFilter, setSeverityFilter] = useState<string>('ALL');
+  const [isCleaning, setIsCleaning] = useState(false);
+
+  const handleCleanEvents = async () => {
+    setIsCleaning(true);
+    try {
+      const res = await fetch('/api/admin/security-events', { method: 'DELETE' });
+      if (res.ok) {
+        onRefresh();
+      }
+    } catch (e) {
+      console.error('Failed to clean security events:', e);
+    } finally {
+      setIsCleaning(false);
+    }
+  };
 
   const filtered = events.filter((e) => {
     if (severityFilter === 'ALL') return true;
@@ -41,21 +57,33 @@ export const SecurityEvents: React.FC<SecurityEventsProps> = ({ events, onRefres
           </p>
         </div>
 
-        {/* Severity Filter */}
-        <div className="flex items-center gap-1 bg-slate-800/80 p-1 rounded-lg border border-slate-700/60 text-xs">
-          {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((sev) => (
-            <button
-              key={sev}
-              onClick={() => setSeverityFilter(sev)}
-              className={`px-2.5 py-1 rounded-md font-medium transition-all ${
-                severityFilter === sev
-                  ? 'bg-rose-500 text-white font-semibold'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {sev}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          {/* Clean Button */}
+          <button
+            onClick={handleCleanEvents}
+            disabled={events.length === 0 || isCleaning}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>{isCleaning ? 'Cleaning...' : 'Clean Events'}</span>
+          </button>
+
+          {/* Severity Filter */}
+          <div className="flex items-center gap-1 bg-slate-800/80 p-1 rounded-lg border border-slate-700/60 text-xs">
+            {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((sev) => (
+              <button
+                key={sev}
+                onClick={() => setSeverityFilter(sev)}
+                className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                  severityFilter === sev
+                    ? 'bg-rose-500 text-white font-semibold'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {sev}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

@@ -39,7 +39,10 @@ export async function POST(req: NextRequest) {
   const results: SecurityTestCase[] = [];
 
   // Test 1: Authorized Domain
-  const t1DomainMatch = isDomainAuthorized('https://example.com', targetDomain as any);
+  const targetOrigin = targetDomain.domain.startsWith('http')
+    ? targetDomain.domain
+    : `https://${targetDomain.normalizedDomain}`;
+  const t1DomainMatch = isDomainAuthorized(targetOrigin, targetDomain as any);
   results.push({
     id: 1,
     name: 'Authorized Domain Access',
@@ -50,7 +53,9 @@ export async function POST(req: NextRequest) {
     actualStatus: t1DomainMatch.matched ? 200 : 403,
     actualCode: t1DomainMatch.matched ? 'OK' : 'UNAUTHORIZED_DOMAIN',
     passed: t1DomainMatch.matched,
-    diagnostics: t1DomainMatch.matched ? 'Origin verified against active whitelist policy' : t1DomainMatch.reason || '',
+    diagnostics: t1DomainMatch.matched
+      ? `Origin verified against active whitelist policy (${targetDomain.normalizedDomain})`
+      : t1DomainMatch.reason || '',
   });
 
   // Test 2: Unauthorized Domain
@@ -307,7 +312,7 @@ export async function POST(req: NextRequest) {
   });
 
   // Test 16: CORS Bypass Attempt
-  const evilOrigin = isDomainAuthorized('https://example.com.attacker.com', targetDomain as any);
+  const evilOrigin = isDomainAuthorized(`https://${targetDomain.normalizedDomain}.attacker.com`, targetDomain as any);
   results.push({
     id: 16,
     name: 'CORS / Domain Suffix Bypass Attempt',

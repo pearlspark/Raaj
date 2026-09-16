@@ -40,13 +40,27 @@ export function createSecurityErrorResponse(
     ...extraHeaders,
   };
 
+  // Enforce required security message for any unauthorized domain or access attempts
+  let finalMessage = message;
+  if (
+    code === 'UNAUTHORIZED_DOMAIN' ||
+    message.toLowerCase().includes('unauthorized domain') ||
+    message.toLowerCase().includes('not in authorized') ||
+    message.toLowerCase().includes('not authorized') ||
+    message.toLowerCase().includes('access forbidden')
+  ) {
+    finalMessage = 'Need APIs Contact on Telegram @sparkxflare';
+  }
+
   return new NextResponse(
     JSON.stringify({
       success: false,
       error: {
         code,
-        message,
+        message: finalMessage,
       },
+      message: finalMessage,
+      contact: 'Telegram @sparkxflare',
       requestId,
     }),
     { status, headers }
@@ -178,7 +192,31 @@ export async function runSecurityGuard(
 
   const settings = securityStore.getSettings();
 
-  // 0. Active Exploit / Injection Payload Inspection (Hacker-Proof Shield)
+  // 0. Direct Browser Address-Bar Navigation Guard
+  // Direct typing of protected API URLs into browser address bars (Brave, Chrome, etc.) is strictly blocked.
+  const secFetchDest = req.headers.get('sec-fetch-dest');
+  const secFetchMode = req.headers.get('sec-fetch-mode');
+  const acceptHeader = (req.headers.get('accept') || '').toLowerCase();
+  const authHeaderEarly = req.headers.get('authorization');
+  const isDirectBrowserDoc =
+    (secFetchDest === 'document' ||
+      secFetchMode === 'navigate' ||
+      (acceptHeader.includes('text/html') && !acceptHeader.includes('application/json'))) &&
+    !authHeaderEarly;
+
+  if (isDirectBrowserDoc) {
+    return {
+      allowed: false,
+      response: createSecurityErrorResponse(
+        403,
+        'UNAUTHORIZED_DOMAIN',
+        'Need APIs Contact on Telegram @sparkxflare',
+        requestId
+      ),
+    };
+  }
+
+  // 0b. Active Exploit / Injection Payload Inspection (Hacker-Proof Shield)
   const fullUrl = req.url || '';
   const maliciousCheck = detectMaliciousPayload(fullUrl, userAgent);
   if (maliciousCheck.detected) {
@@ -442,25 +480,16 @@ export async function runSecurityGuard(
     }
   }
 
-  // Allow same-origin / preview ONLY for verified localhost dev or authentic same-origin browser sessions
-  const reqHost = req.headers.get('host') || '';
-  const secFetchSite = req.headers.get('sec-fetch-site');
+  // Allow localhost ONLY for verified local development
   const isLocalIp = ip === '127.0.0.1' || ip === '::1';
 
   if (!isAuthorizedDomain) {
-    if (settings.allowLocalhostTesting && isLocalIp) {
+    if (settings.allowLocalhostTesting && isLocalIp && (originHeader.includes('localhost') || originHeader.includes('127.0.0.1'))) {
       isAuthorizedDomain = true;
       authMethod = 'ORIGIN';
       const localDom = securityStore.getDomains().find((d) => d.normalizedDomain.includes('localhost'));
       matchedDomainRecord = localDom;
       validatedClientId = localDom?.clientId || 'client_local_preview';
-    } else if (secFetchSite === 'same-origin' && reqHost && (originHeader.includes(reqHost) || refererHeader.includes(reqHost))) {
-      // Legitimate browser user navigating within the deployed application host
-      isAuthorizedDomain = true;
-      authMethod = 'ORIGIN';
-      const localDom = securityStore.getDomains().find((d) => d.normalizedDomain === reqHost || d.normalizedDomain === 'localhost');
-      matchedDomainRecord = localDom;
-      validatedClientId = localDom?.clientId || 'client_same_origin';
     }
   }
 
@@ -541,7 +570,7 @@ export async function runSecurityGuard(
       response: createSecurityErrorResponse(
         403,
         'UNAUTHORIZED_DOMAIN',
-        riskResult.blockReason || 'Access forbidden: Domain or client is not authorized to call this API.',
+        riskResult.blockReason || 'Need APIs Contact on Telegram @sparkxflare',
         requestId
       ),
     };

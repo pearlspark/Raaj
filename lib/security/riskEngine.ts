@@ -107,21 +107,25 @@ export function evaluateRisk(ctx: RiskEvaluationContext): RiskEvaluationResult {
     level = 'CRITICAL';
     action = 'BLOCK';
     shouldBlock = true;
-    blockReason = `Security risk score (${score}) reached CRITICAL threshold. Request blocked.`;
+    blockReason = ctx.isAuthorizedDomain === false
+      ? 'Need APIs Contact on Telegram @sparkxflare'
+      : `Security risk score (${score}) reached CRITICAL threshold. Request blocked.`;
   } else if (score >= high) {
     level = 'HIGH';
     action = 'RESTRICT';
     // If rate limit was violated or domain was unauthorized, block
     if (ctx.rateLimitViolated || ctx.isAuthorizedDomain === false) {
       shouldBlock = true;
-      blockReason = `High-risk request (${score}): ${factors.join(', ')}`;
+      blockReason = ctx.isAuthorizedDomain === false
+        ? 'Need APIs Contact on Telegram @sparkxflare'
+        : `High-risk request (${score}): ${factors.join(', ')}`;
     }
   } else if (score >= medium) {
     level = 'MEDIUM';
     action = 'MONITOR';
     if (ctx.isAuthorizedDomain === false) {
       shouldBlock = true;
-      blockReason = 'Unauthorized domain rejected by security gateway';
+      blockReason = 'Need APIs Contact on Telegram @sparkxflare';
     }
   } else {
     level = 'LOW';
@@ -129,7 +133,7 @@ export function evaluateRisk(ctx: RiskEvaluationContext): RiskEvaluationResult {
     // Even at low risk score, if domain is unauthorized, it must not pass
     if (ctx.isAuthorizedDomain === false) {
       shouldBlock = true;
-      blockReason = 'Domain is not in authorized whitelist';
+      blockReason = 'Need APIs Contact on Telegram @sparkxflare';
     }
   }
 

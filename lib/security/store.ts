@@ -640,6 +640,14 @@ class SecurityStore {
     return { logs, total, page, totalPages };
   }
 
+  public clearRequestLogs(): void {
+    this.data.requestLogs = [];
+    this.saveData();
+    getDatabase().then((db) => {
+      if (db) db.collection('request_logs').deleteMany({}).catch(() => {});
+    }).catch(() => {});
+  }
+
   // --- SECURITY EVENTS ---
   public addSecurityEvent(event: Omit<SecurityEvent, 'id' | 'timestamp'>): SecurityEvent {
     const fullEvent: SecurityEvent = {
@@ -657,6 +665,14 @@ class SecurityStore {
 
   public getSecurityEvents(limit: number = 100): SecurityEvent[] {
     return this.data.securityEvents.slice(0, limit);
+  }
+
+  public clearSecurityEvents(): void {
+    this.data.securityEvents = [];
+    this.saveData();
+    getDatabase().then((db) => {
+      if (db) db.collection('security_events').deleteMany({}).catch(() => {});
+    }).catch(() => {});
   }
 
   // --- IP BLOCKING & COOLDOWNS ---

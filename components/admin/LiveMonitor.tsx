@@ -15,6 +15,7 @@ import {
   ExternalLink,
   Copy,
   Check,
+  Trash2,
 } from 'lucide-react';
 import { RequestLog } from '@/lib/security/types';
 
@@ -25,9 +26,24 @@ interface LiveMonitorProps {
 export const LiveMonitor: React.FC<LiveMonitorProps> = ({ onBlockIp }) => {
   const [logs, setLogs] = useState<RequestLog[]>([]);
   const [isPaused, setIsPaused] = useState(false);
+  const [isCleaning, setIsCleaning] = useState(false);
   const [filterType, setFilterType] = useState<'ALL' | 'BLOCKED' | 'SUSPICIOUS' | 'SUCCESS'>('ALL');
   const [selectedLog, setSelectedLog] = useState<RequestLog | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCleanFeed = async () => {
+    setIsCleaning(true);
+    try {
+      const res = await fetch('/api/admin/requests', { method: 'DELETE' });
+      if (res.ok) {
+        setLogs([]);
+      }
+    } catch (e) {
+      console.error('Failed to clean live feed:', e);
+    } finally {
+      setIsCleaning(false);
+    }
+  };
 
   useEffect(() => {
     let isCancelled = false;
@@ -115,7 +131,7 @@ export const LiveMonitor: React.FC<LiveMonitorProps> = ({ onBlockIp }) => {
           {/* Pause / Resume Button */}
           <button
             onClick={() => setIsPaused(!isPaused)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
               isPaused
                 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30'
                 : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
@@ -130,6 +146,17 @@ export const LiveMonitor: React.FC<LiveMonitorProps> = ({ onBlockIp }) => {
                 <Pause className="w-3.5 h-3.5" /> Pause
               </>
             )}
+          </button>
+
+          {/* Clean Feed Button */}
+          <button
+            onClick={handleCleanFeed}
+            disabled={logs.length === 0 || isCleaning}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            title="Clean all logs and clear live feed"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>{isCleaning ? 'Cleaning...' : 'Clean Feed'}</span>
           </button>
         </div>
       </div>

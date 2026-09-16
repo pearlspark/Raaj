@@ -15,3 +15,16 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ success: true, events });
 }
+
+export async function DELETE(req: NextRequest) {
+  const session = verifyAdminSession(req);
+  if (!session.valid) {
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+  }
+
+  securityStore.clearSecurityEvents();
+  return NextResponse.json({
+    success: true,
+    message: 'Security events cleaned successfully.',
+  });
+}
