@@ -1,0 +1,281 @@
+{
+  "domains": [
+    {
+      "id": "dom_mu2qo00pqhoh",
+      "clientId": "client_33ad8e79e302fd123c50fd74",
+      "clientSecretHash": "b51db8a55b6b355b9a215a6c7e08351d0d901275ce57bb6470ff803c8ca8504e",
+      "clientSecretPrefix": "sec_yCmE...r9Xf",
+      "createdAt": "2026-09-15T14:00:02.329Z",
+      "domain": "http://localhost:3000",
+      "failedRequests": 0,
+      "lastActiveAt": "2026-09-15T14:08:49.422Z",
+      "lastEndpoint": "",
+      "lastIp": "106.192.188.170",
+      "mode": "SUBDOMAIN",
+      "normalizedDomain": "localhost",
+      "rateLimitPerMin": 120,
+      "rateLimitViolations": 0,
+      "status": "ACTIVE",
+      "successfulRequests": 1,
+      "totalRequests": 1,
+      "uniqueIps": [
+        "106.192.188.170"
+      ],
+      "uniqueUserAgents": [
+        "python-requests/2.34.2"
+      ],
+      "updatedAt": "2026-09-15T14:00:02.329Z"
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "client_33ad8e79e302fd123c50fd74",
+      "createdAt": "2026-09-15T14:00:02.329Z",
+      "domainId": "dom_mu2qo00pqhoh",
+      "domainName": "http://localhost:3000",
+      "name": "Naam ",
+      "permissions": [
+        "*"
+      ],
+      "status": "ACTIVE"
+    }
+  ],
+  "requestLogs": [
+    {
+      "id": "log_mu3ul0jxqk1",
+      "requestId": "req_429d3f6f4d85dcc9a2aa",
+      "timestamp": "2026-09-16T08:37:27.693Z",
+      "ip": "::ffff:127.0.0.1",
+      "country": "Unknown",
+      "region": "Global",
+      "city": "Internet",
+      "userAgent": "Mozilla/5.0",
+      "origin": "http://localhost:3000",
+      "referer": "",
+      "clientId": "client_33ad8e79e302fd123c50fd74",
+      "domain": "localhost",
+      "endpoint": "",
+      "method": "GET",
+      "statusCode": 200,
+      "responseTimeMs": 764,
+      "responseSizeBytes": 450,
+      "riskScore": 0,
+      "riskFactors": [],
+      "blocked": false
+    },
+    {
+      "id": "log_mu3ukw3kyri",
+      "requestId": "req_cb1a154afd37f93d8753",
+      "timestamp": "2026-09-16T08:37:21.920Z",
+      "ip": "::ffff:127.0.0.1",
+      "country": "Unknown",
+      "region": "Global",
+      "city": "Internet",
+      "userAgent": "Mozilla/5.0",
+      "origin": "http://localhost:3000",
+      "referer": "",
+      "clientId": "client_33ad8e79e302fd123c50fd74",
+      "domain": "localhost",
+      "endpoint": "",
+      "method": "GET",
+      "statusCode": 200,
+      "responseTimeMs": 496,
+      "responseSizeBytes": 450,
+      "riskScore": 0,
+      "riskFactors": [],
+      "blocked": false
+    },
+    {
+      "id": "log_mu3ukqrih0f",
+      "requestId": "req_c8b25862cca1df943bb2",
+      "timestamp": "2026-09-16T08:37:15.006Z",
+      "ip": "::ffff:127.0.0.1",
+      "country": "Unknown",
+      "region": "Global",
+      "city": "Internet",
+      "userAgent": "Mozilla/5.0",
+      "origin": "http://localhost:3000",
+      "referer": "",
+      "clientId": "client_33ad8e79e302fd123c50fd74",
+      "domain": "localhost",
+      "endpoint": "",
+      "method": "GET",
+      "statusCode": 200,
+      "responseTimeMs": 925,
+      "responseSizeBytes": 450,
+      "riskScore": 0,
+      "riskFactors": [],
+      "blocked": false
+    },
+    {
+      "id": "log_mu3ukibsqwo",
+      "requestId": "req_b7d817291e14cb3b0cbc",
+      "timestamp": "2026-09-16T08:37:04.072Z",
+      "ip": "::ffff:127.0.0.1",
+      "country": "Unknown",
+      "region": "Global",
+      "city": "Internet",
+      "userAgent": "Mozilla/5.0",
+      "origin": "http://localhost:3000",
+      "referer": "",
+      "clientId": "client_33ad8e79e302fd123c50fd74",
+      "domain": "localhost",
+      "endpoint": "",
+      "method": "GET",
+      "statusCode": 200,
+      "responseTimeMs": 476,
+      "responseSizeBytes": 450,
+      "riskScore": 0,
+      "riskFactors": [],
+      "blocked": false
+    },
+    {
+      "id": "log_mu3ukemmtd5",
+      "requestId": "req_c16633b2725722478a8f",
+      "timestamp": "2026-09-16T08:36:59.278Z",
+      "ip": "::ffff:127.0.0.1",
+      "country": "Unknown",
+      "region": "Global",
+      "city": "Internet",
+      "userAgent": "Mozilla/5.0",
+      "origin": "http://localhost:3000",
+      "referer": "",
+      "clientId": "client_33ad8e79e302fd123c50fd74",
+      "domain": "localhost",
+      "endpoint": "",
+      "method": "GET",
+      "statusCode": 200,
+      "responseTimeMs": 472,
+      "responseSizeBytes": 450,
+      "riskScore": 0,
+      "riskFactors": [],
+      "blocked": false
+    },
+    {
+      "id": "log_mu3ukaxdv3f",
+      "requestId": "req_7586b33c2d4f77c8fc59",
+      "timestamp": "2026-09-16T08:36:54.481Z",
+      "ip": "::ffff:127.0.0.1",
+      "country": "Unknown",
+      "region": "Global",
+      "city": "Internet",
+      "userAgent": "Mozilla/5.0",
+      "origin": "http://localhost:3000",
+      "referer": "",
+      "clientId": "client_33ad8e79e302fd123c50fd74",
+      "domain": "localhost",
+      "endpoint": "",
+      "method": "GET",
+      "statusCode": 200,
+      "responseTimeMs": 907,
+      "responseSizeBytes": 450,
+      "riskScore": 0,
+      "riskFactors": [],
+      "blocked": false
+    },
+    {
+      "id": "log_mu3ug82mj8p",
+      "requestId": "req_1644b55c18cb01136ab6",
+      "timestamp": "2026-09-16T08:33:44.158Z",
+      "ip": "::ffff:127.0.0.1",
+      "country": "Unknown",
+      "region": "Global",
+      "city": "Internet",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+      "origin": "http://localhost:3000",
+      "referer": "",
+      "clientId": "client_33ad8e79e302fd123c50fd74",
+      "domain": "localhost",
+      "endpoint": "",
+      "method": "GET",
+      "statusCode": 200,
+      "responseTimeMs": 1770,
+      "responseSizeBytes": 450,
+      "riskScore": 0,
+      "riskFactors": [],
+      "blocked": false
+    },
+    {
+      "id": "log_mu3ufzctygu",
+      "requestId": "req_d9d50165e23524761467",
+      "timestamp": "2026-09-16T08:33:32.861Z",
+      "ip": "::ffff:127.0.0.1",
+      "country": "Unknown",
+      "region": "Global",
+      "city": "Internet",
+      "userAgent": "curl/7.88.1",
+      "origin": "",
+      "referer": "",
+      "clientId": "unauthorized",
+      "domain": "unauthorized",
+      "endpoint": "/api/batches",
+      "method": "GET",
+      "statusCode": 403,
+      "responseTimeMs": 4,
+      "responseSizeBytes": 120,
+      "riskScore": 65,
+      "riskFactors": [
+        "Unauthorized Domain Access: Origin not whitelisted (+50)",
+        "Automated Bot User-Agent detected: \"curl/7.88.1\" (+15)"
+      ],
+      "blocked": true,
+      "blockReason": "High-risk request (65): Unauthorized Domain Access: Origin not whitelisted (+50), Automated Bot User-Agent detected: \"curl/7.88.1\" (+15)"
+    }
+  ],
+  "securityEvents": [
+    {
+      "severity": "HIGH",
+      "type": "UNAUTHORIZED_ACCESS_ATTEMPT",
+      "domain": "",
+      "ip": "::ffff:127.0.0.1",
+      "endpoint": "/api/batches",
+      "reason": "High-risk request (65): Unauthorized Domain Access: Origin not whitelisted (+50), Automated Bot User-Agent detected: \"curl/7.88.1\" (+15)",
+      "actionTaken": "HTTP 403 Forbidden response returned",
+      "requestId": "req_d9d50165e23524761467",
+      "id": "sec_evt_mu3ufzcs4ajh",
+      "timestamp": "2026-09-16T08:33:32.860Z"
+    }
+  ],
+  "blockedIps": [
+    {
+      "ip": "203.0.113.88",
+      "blockedAt": "2026-09-16T08:32:05.091Z",
+      "blockedBy": "test_runner",
+      "expiresAt": "2026-09-16T08:37:05.091Z",
+      "isPermanent": false,
+      "reason": "Automated scraping simulator test"
+    }
+  ],
+  "auditLogs": [],
+  "settings": {
+    "riskThresholds": {
+      "medium": 30,
+      "high": 60,
+      "critical": 80
+    },
+    "rateLimits": {
+      "defaultDomainPerMin": 1000,
+      "defaultIpPerMin": 120,
+      "videoEndpointPerMin": 20,
+      "authEndpointPerMin": 30
+    },
+    "retentionDays": 30,
+    "enableAutoBlock": true,
+    "autoBlockDurationMinutes": 15,
+    "clockSkewSeconds": 300,
+    "upstreamBaseUrl": "https://api.penpencil.co",
+    "allowLocalhostTesting": true,
+    "updatedAt": "2026-09-16T08:23:56.105Z"
+  },
+  "adminUsers": [
+    {
+      "id": "usr_admin_001",
+      "username": "LegaMeraBSDK",
+      "passwordHash": "",
+      "passwordSalt": "",
+      "role": "SUPER_ADMIN",
+      "createdAt": "2026-09-16T08:27:04.421Z",
+      "lastLoginAt": "2026-09-16T08:27:04.421Z"
+    }
+  ]
+}

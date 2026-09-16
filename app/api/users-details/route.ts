@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { runSecurityGuard, finalizeSecurityResponse, createSecurityErrorResponse, createSecurityOptionsResponse } from '@/lib/security/gatewayMiddleware';
-import { fetchPW } from '@/lib/services/pwService';
+import { runSecurityGuard, finalizeSecurityResponse, createSecurityOptionsResponse } from '@/lib/security/gatewayMiddleware';
+import { proxyToUpstream } from '@/lib/services/upstreamService';
 
 export async function GET(req: NextRequest) {
   const startTime = Date.now();
@@ -13,16 +13,12 @@ export async function GET(req: NextRequest) {
     return guard.response;
   }
 
-  const userIds = req.nextUrl.searchParams.get('userIds');
-  if (!userIds) {
-    return createSecurityErrorResponse(400, 'BAD_REQUEST', 'userIds query parameter is required', guard.ctx.requestId);
-  }
-
-  const data = await fetchPW(`/v1/users/get-user-details-list`, { userIds });
-  const response = NextResponse.json(data);
+  const upstream = await proxyToUpstream('/api/users-details', req.nextUrl.searchParams, req);
+  const response = NextResponse.json(upstream.data, { status: upstream.status });
   return finalizeSecurityResponse(response, guard.ctx, startTime);
 }
 
 export async function OPTIONS(req: NextRequest) {
   return createSecurityOptionsResponse(req);
 }
+
