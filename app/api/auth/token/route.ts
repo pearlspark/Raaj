@@ -2,19 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { securityStore } from '@/lib/security/store';
 import { verifySecret, signAccessToken, generateRequestId } from '@/lib/security/crypto';
 import { isDomainAuthorized, extractClientDomain } from '@/lib/security/domainGuard';
-import { createSecurityErrorResponse } from '@/lib/security/gatewayMiddleware';
+import { createSecurityErrorResponse, createSecurityOptionsResponse } from '@/lib/security/gatewayMiddleware';
 
 export async function OPTIONS(req: NextRequest) {
-  const origin = req.headers.get('origin') || '*';
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': origin,
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-ID',
-      'Access-Control-Max-Age': '86400',
-    },
-  });
+  return createSecurityOptionsResponse(req);
 }
 
 export async function POST(req: NextRequest) {

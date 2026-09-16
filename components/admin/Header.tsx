@@ -61,39 +61,19 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2.5">
-          {/* Quick View Switcher: Admin Gateway vs Student App Preview */}
-          <button
-            onClick={() => setActiveTab(activeTab === 'edu-preview' ? 'overview' : 'edu-preview')}
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-              activeTab === 'edu-preview'
-                ? 'liquid-btn-primary text-white'
-                : 'liquid-btn-glass text-slate-200'
-            }`}
-          >
-            {activeTab === 'edu-preview' ? (
-              <>
-                <Terminal className="w-3.5 h-3.5 text-cyan-200" />
-                <span>Security Console</span>
-              </>
-            ) : (
-              <>
-                <GraduationCap className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Student Portal</span>
-              </>
-            )}
-          </button>
-
           {/* Admin user info & Logout */}
-          <div className="flex items-center gap-2 pl-2.5 border-l border-white/10">
-            <span className="text-xs text-slate-300 font-mono font-medium hidden sm:inline-block px-2.5 py-1 rounded-lg liquid-glass-subtle">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xs text-slate-300 font-mono font-medium hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl liquid-glass-subtle border border-white/10">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
               {adminUser?.username || 'admin'}
             </span>
             <button
               onClick={onLogout}
               title="Terminate Security Session"
-              className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-white/5 hover:border-rose-500/20 transition-all cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>

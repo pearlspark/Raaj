@@ -85,6 +85,28 @@ class SecurityStore {
       const db = await getDatabase();
       if (!db) return;
 
+      // 1. Purge any dummy records once and for all so they never reappear
+      await Promise.all([
+        db.collection('authorized_domains').deleteMany({
+          $or: [
+            { id: { $in: ['dom_example_001', 'dom_pirate_003'] } },
+            { domain: { $in: ['https://example.com', 'https://pirate-streams.net'] } },
+            { normalizedDomain: { $in: ['example.com', 'pirate-streams.net'] } },
+          ],
+        }).catch(() => {}),
+        db.collection('api_clients').deleteMany({
+          $or: [
+            { clientId: { $in: ['client_2520d4e3d4271f6d37a010a1', 'client_aa02d7e7031ba4a44cb077f7'] } },
+            { name: { $in: ['Example Production Web Portal', 'Revoked Scraper Client'] } },
+            { domainName: { $in: ['https://example.com', 'https://pirate-streams.net'] } },
+          ],
+        }).catch(() => {}),
+        db.collection('blocked_ips').deleteMany({
+          ip: { $in: ['185.220.101.5', '194.26.29.112'] },
+        }).catch(() => {}),
+      ]);
+
+      // 2. Fetch authoritative real records from MongoDB
       const [remoteDomains, remoteClients, remoteSettings, remoteBlockedIps] = await Promise.all([
         db.collection('authorized_domains').find({}).toArray().catch(() => []),
         db.collection('api_clients').find({}).toArray().catch(() => []),
@@ -92,58 +114,36 @@ class SecurityStore {
         db.collection('blocked_ips').find({}).toArray().catch(() => []),
       ]);
 
-      let changed = false;
-      if (remoteDomains && remoteDomains.length > 0) {
-        for (const rd of remoteDomains) {
-          const { _id, ...domData } = rd as any;
-          const existingIdx = this.data.domains.findIndex((d) => d.id === domData.id);
-          if (existingIdx >= 0) {
-            this.data.domains[existingIdx] = { ...this.data.domains[existingIdx], ...domData };
-          } else {
-            this.data.domains.push(domData as DomainRecord);
-          }
-        }
-        changed = true;
-      }
+      // Load remote data - MongoDB is the source of truth
+      this.data.domains = remoteDomains.map((rd: any) => {
+        const { _id, ...domData } = rd;
+        return domData as DomainRecord;
+      });
 
-      if (remoteClients && remoteClients.length > 0) {
-        for (const rc of remoteClients) {
-          const { _id, ...clientData } = rc as any;
-          const existingIdx = this.data.clients.findIndex((c) => c.clientId === clientData.clientId);
-          if (existingIdx >= 0) {
-            this.data.clients[existingIdx] = { ...this.data.clients[existingIdx], ...clientData };
-          } else {
-            this.data.clients.push(clientData as ApiClientRecord);
-          }
-        }
-        changed = true;
+      this.data.clients = remoteClients.map((rc: any) => {
+        const { _id, ...clientData } = rc;
+        return clientData as ApiClientRecord;
+      });
+
+      if (remoteBlockedIps && remoteBlockedIps.length > 0) {
+        this.data.blockedIps = remoteBlockedIps.map((rb: any) => {
+          const { _id, ...ipData } = rb;
+          return ipData as BlockedIP;
+        });
       }
 
       if (remoteSettings) {
         const { _id, ...settingsData } = remoteSettings as any;
-        this.data.settings = { ...this.data.settings, ...settingsData };
-        changed = true;
+        this.data.settings = { ...DEFAULT_SETTINGS, ...settingsData };
       }
 
-      if (remoteBlockedIps && remoteBlockedIps.length > 0) {
-        for (const rb of remoteBlockedIps) {
-          const { _id, ...ipData } = rb as any;
-          if (!this.data.blockedIps.some((b) => b.ip === ipData.ip)) {
-            this.data.blockedIps.push(ipData as BlockedIP);
-          }
+      try {
+        if (!fs.existsSync(DATA_DIR)) {
+          fs.mkdirSync(DATA_DIR, { recursive: true });
         }
-        changed = true;
-      }
-
-      if (changed) {
-        try {
-          fs.writeFileSync(DATA_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
-        } catch {
-          // ignore
-        }
-      } else {
-        // First-time database population
-        await this.syncToMongo();
+        fs.writeFileSync(DATA_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
+      } catch {
+        // ignore
       }
     } catch (err) {
       console.warn('[MongoDB] Init sync skipped:', (err as Error).message);
@@ -198,14 +198,6 @@ class SecurityStore {
     }
   }
 
-  private asyncMongoSync(): void {
-    if (this.mongoSyncTimeout) return;
-    this.mongoSyncTimeout = setTimeout(async () => {
-      this.mongoSyncTimeout = null;
-      await this.syncToMongo().catch(() => {});
-    }, 1500);
-  }
-
   private loadData(): StoreData {
     try {
       if (!fs.existsSync(DATA_DIR)) {
@@ -215,13 +207,24 @@ class SecurityStore {
       if (fs.existsSync(DATA_FILE)) {
         const raw = fs.readFileSync(DATA_FILE, 'utf-8');
         const parsed = JSON.parse(raw);
+        // Filter out any stale dummy data if present
+        const cleanDomains = (parsed.domains || []).filter(
+          (d: any) => !['dom_example_001', 'dom_pirate_003'].includes(d.id) &&
+                      !['example.com', 'pirate-streams.net'].includes(d.normalizedDomain)
+        );
+        const cleanClients = (parsed.clients || []).filter(
+          (c: any) => !['client_2520d4e3d4271f6d37a010a1', 'client_aa02d7e7031ba4a44cb077f7'].includes(c.clientId)
+        );
+
         return {
           ...parsed,
+          domains: cleanDomains,
+          clients: cleanClients,
           settings: { ...DEFAULT_SETTINGS, ...(parsed.settings || {}) },
         };
       }
     } catch (err) {
-      console.warn('Could not read persistent store, initializing seed data:', err);
+      console.warn('Could not read persistent store, initializing clean store:', err);
     }
 
     return this.createSeedData();
@@ -236,270 +239,11 @@ class SecurityStore {
     } catch (err) {
       console.error('Failed to save persistent store to disk:', err);
     }
-    this.asyncMongoSync();
   }
 
   private createSeedData(): StoreData {
-    const now = new Date();
-    const nowIso = now.toISOString();
-
-    // Generate seed authorized domain: example.com
-    const exampleCreds = generateClientCredentials();
-    const exampleDomain: DomainRecord = {
-      id: 'dom_example_001',
-      domain: 'https://example.com',
-      normalizedDomain: 'example.com',
-      mode: 'SUBDOMAIN',
-      status: 'ACTIVE',
-      clientId: exampleCreds.clientId,
-      clientSecretHash: exampleCreds.secretHash,
-      clientSecretPrefix: exampleCreds.secretPrefix,
-      rateLimitPerMin: 1000,
-      totalRequests: 87431,
-      successfulRequests: 86910,
-      failedRequests: 521,
-      rateLimitViolations: 12,
-      lastIp: '103.14.88.22',
-      uniqueIps: ['103.14.88.22', '49.36.120.5', '152.58.33.10'],
-      uniqueUserAgents: ['Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4)'],
-      lastEndpoint: '/api/video-url',
-      lastActiveAt: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString(),
-      updatedAt: nowIso,
-    };
-
-    // Generate seed local/current domain for live app preview
-    const localCreds = generateClientCredentials();
-    const localDomain: DomainRecord = {
-      id: 'dom_local_002',
-      domain: 'http://localhost:3000',
-      normalizedDomain: 'localhost',
-      mode: 'EXACT',
-      status: 'ACTIVE',
-      clientId: localCreds.clientId,
-      clientSecretHash: localCreds.secretHash,
-      clientSecretPrefix: localCreds.secretPrefix,
-      rateLimitPerMin: 500,
-      totalRequests: 3410,
-      successfulRequests: 3380,
-      failedRequests: 30,
-      rateLimitViolations: 1,
-      lastIp: '127.0.0.1',
-      uniqueIps: ['127.0.0.1'],
-      uniqueUserAgents: ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'],
-      lastEndpoint: '/api/batches',
-      lastActiveAt: nowIso,
-      createdAt: new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString(),
-      updatedAt: nowIso,
-    };
-
-    // Blocked domain example
-    const badCreds = generateClientCredentials();
-    const blockedDomain: DomainRecord = {
-      id: 'dom_pirate_003',
-      domain: 'https://pirate-streams.net',
-      normalizedDomain: 'pirate-streams.net',
-      mode: 'SUBDOMAIN',
-      status: 'BLOCKED',
-      clientId: badCreds.clientId,
-      clientSecretHash: badCreds.secretHash,
-      clientSecretPrefix: badCreds.secretPrefix,
-      rateLimitPerMin: 100,
-      totalRequests: 1420,
-      successfulRequests: 40,
-      failedRequests: 1380,
-      rateLimitViolations: 85,
-      lastIp: '185.220.101.5',
-      uniqueIps: ['185.220.101.5', '185.220.101.6'],
-      uniqueUserAgents: ['Python-urllib/3.10', 'curl/8.1.2'],
-      lastEndpoint: '/api/video-url',
-      lastActiveAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-      createdAt: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(),
-      updatedAt: nowIso,
-    };
-
-    const clients: ApiClientRecord[] = [
-      {
-        clientId: exampleCreds.clientId,
-        name: 'Example Production Web Portal',
-        domainId: exampleDomain.id,
-        domainName: exampleDomain.domain,
-        status: 'ACTIVE',
-        permissions: ['read:batches', 'read:schedule', 'read:video', 'read:khazana'],
-        createdAt: exampleDomain.createdAt,
-        lastUsedAt: exampleDomain.lastActiveAt,
-      },
-      {
-        clientId: localCreds.clientId,
-        name: 'Local Dev / AI Studio Preview',
-        domainId: localDomain.id,
-        domainName: localDomain.domain,
-        status: 'ACTIVE',
-        permissions: ['*'],
-        createdAt: localDomain.createdAt,
-        lastUsedAt: localDomain.lastActiveAt,
-      },
-      {
-        clientId: badCreds.clientId,
-        name: 'Revoked Scraper Client',
-        domainId: blockedDomain.id,
-        domainName: blockedDomain.domain,
-        status: 'REVOKED',
-        permissions: ['read:video'],
-        createdAt: blockedDomain.createdAt,
-        lastUsedAt: blockedDomain.lastActiveAt,
-      },
-    ];
-
-    // Seed realistic recent request logs
-    const endpoints = [
-      '/api/batches',
-      '/api/batch-details',
-      '/api/video-url',
-      '/api/todays-schedule',
-      '/api/contents',
-      '/api/slides',
-      '/api/health',
-    ];
-    const cities = [
-      { city: 'Mumbai', country: 'India', region: 'Maharashtra', ip: '103.14.88.22' },
-      { city: 'Delhi', country: 'India', region: 'Delhi', ip: '49.36.120.5' },
-      { city: 'Bengaluru', country: 'India', region: 'Karnataka', ip: '152.58.33.10' },
-      { city: 'Frankfurt', country: 'Germany', region: 'Hesse', ip: '185.220.101.5' },
-      { city: 'Singapore', country: 'Singapore', region: 'Singapore', ip: '13.250.44.11' },
-      { city: 'Ashburn', country: 'United States', region: 'Virginia', ip: '54.210.12.98' },
-    ];
-
-    const requestLogs: RequestLog[] = [];
-    for (let i = 0; i < 40; i++) {
-      const pastTime = new Date(Date.now() - i * 45 * 1000).toISOString();
-      const loc = cities[i % cities.length];
-      const isBad = loc.ip === '185.220.101.5';
-      const ep = endpoints[i % endpoints.length];
-      const statusCode = isBad ? (i % 2 === 0 ? 403 : 429) : 200;
-      const riskScore = isBad ? 85 : Math.floor(Math.random() * 20);
-
-      requestLogs.push({
-        id: `log_${i + 1}`,
-        requestId: `req_live_${1000 + i}`,
-        timestamp: pastTime,
-        ip: loc.ip,
-        country: loc.country,
-        region: loc.region,
-        city: loc.city,
-        userAgent: isBad
-          ? 'Python-requests/2.31.0'
-          : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36',
-        origin: isBad ? 'https://pirate-streams.net' : 'https://example.com',
-        referer: isBad ? 'https://pirate-streams.net/watch' : 'https://example.com/learn',
-        clientId: isBad ? badCreds.clientId : exampleCreds.clientId,
-        domain: isBad ? 'pirate-streams.net' : 'example.com',
-        endpoint: ep,
-        method: 'GET',
-        statusCode,
-        responseTimeMs: Math.floor(Math.random() * 120) + 30,
-        responseSizeBytes: statusCode === 200 ? 1420 + i * 50 : 210,
-        riskScore,
-        riskFactors: isBad ? ['Unauthorized Domain', 'Blocked Client', 'Suspicious Bot User-Agent'] : [],
-        blocked: isBad,
-        blockReason: isBad ? 'Domain is permanently blocked by administrator' : undefined,
-      });
-    }
-
-    const securityEvents: SecurityEvent[] = [
-      {
-        id: 'sec_evt_001',
-        timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-        severity: 'CRITICAL',
-        type: 'UNAUTHORIZED_DOMAIN_ACCESS',
-        clientId: badCreds.clientId,
-        domain: 'pirate-streams.net',
-        ip: '185.220.101.5',
-        endpoint: '/api/video-url',
-        reason: 'Client attempted video extraction from blocked unauthorized domain',
-        actionTaken: 'Request rejected with 403 Forbidden. IP added to high-risk watchlist.',
-        requestId: 'req_live_1012',
-      },
-      {
-        id: 'sec_evt_002',
-        timestamp: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
-        severity: 'HIGH',
-        type: 'RATE_LIMIT_EXCEEDED',
-        clientId: exampleCreds.clientId,
-        domain: 'example.com',
-        ip: '49.36.120.5',
-        endpoint: '/api/video-url',
-        reason: 'Client exceeded 20 requests/minute video endpoint threshold',
-        actionTaken: 'HTTP 429 Too Many Requests with Retry-After: 35s header',
-        requestId: 'req_live_1025',
-      },
-      {
-        id: 'sec_evt_003',
-        timestamp: new Date(Date.now() - 120 * 60 * 1000).toISOString(),
-        severity: 'WARN',
-        type: 'EXPIRED_TOKEN_SUBMISSION',
-        clientId: exampleCreds.clientId,
-        domain: 'example.com',
-        ip: '103.14.88.22',
-        endpoint: '/api/todays-schedule',
-        reason: 'Authorization header presented expired signed token (clock delta > 900s)',
-        actionTaken: 'HTTP 401 Unauthorized with token refresh challenge',
-        requestId: 'req_live_1038',
-      },
-    ];
-
-    const blockedIps: BlockedIP[] = [
-      {
-        ip: '185.220.101.5',
-        reason: 'Automated video URL scraping and crawler enumeration',
-        blockedAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
-        isPermanent: true,
-        blockedBy: 'system_risk_engine',
-      },
-      {
-        ip: '194.26.29.112',
-        reason: 'Repeated 403 authorization failures (14 attempts in 1 minute)',
-        blockedAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
-        expiresAt: new Date(Date.now() + 12 * 3600 * 1000).toISOString(),
-        isPermanent: false,
-        blockedBy: 'admin',
-      },
-    ];
-
-    const auditLogs: AdminAuditLog[] = [
-      {
-        id: 'aud_001',
-        timestamp: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
-        admin: 'admin',
-        action: 'DOMAIN_ADDED',
-        target: 'https://example.com',
-        ip: '127.0.0.1',
-        details: 'Added authorized domain in SUBDOMAIN mode with limit 1000 req/min',
-        result: 'SUCCESS',
-      },
-      {
-        id: 'aud_002',
-        timestamp: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
-        admin: 'system',
-        action: 'IP_BLOCKED',
-        target: '185.220.101.5',
-        ip: '127.0.0.1',
-        details: 'Automatic block triggered by CRITICAL risk score >= 80',
-        result: 'SUCCESS',
-      },
-      {
-        id: 'aud_003',
-        timestamp: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
-        admin: 'admin',
-        action: 'DOMAIN_BLOCKED',
-        target: 'https://pirate-streams.net',
-        ip: '127.0.0.1',
-        details: 'Manually blocked malicious clone domain',
-        result: 'SUCCESS',
-      },
-    ];
-
     const configuredAdmin = process.env.ADMIN_USERNAME?.trim() || 'admin';
+    const nowIso = new Date().toISOString();
     const adminUsers = [
       {
         id: 'usr_admin_001',
@@ -513,24 +257,15 @@ class SecurityStore {
     ];
 
     const seeded: StoreData = {
-      domains: [exampleDomain, localDomain, blockedDomain],
-      clients,
-      requestLogs,
-      securityEvents,
-      blockedIps,
-      auditLogs,
+      domains: [],
+      clients: [],
+      requestLogs: [],
+      securityEvents: [],
+      blockedIps: [],
+      auditLogs: [],
       settings: DEFAULT_SETTINGS,
       adminUsers,
     };
-
-    try {
-      if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
-      }
-      fs.writeFileSync(DATA_FILE, JSON.stringify(seeded, null, 2), 'utf-8');
-    } catch {
-      // ignore
-    }
 
     return seeded;
   }
@@ -674,6 +409,14 @@ class SecurityStore {
     this.data.clients.unshift(clientRecord);
     this.saveData();
 
+    getDatabase().then(async (db) => {
+      if (!db) return;
+      await Promise.all([
+        db.collection('authorized_domains').updateOne({ id: record.id }, { $set: record }, { upsert: true }),
+        db.collection('api_clients').updateOne({ clientId: clientRecord.clientId }, { $set: clientRecord }, { upsert: true }),
+      ]);
+    }).catch((err) => console.warn('[MongoDB] addDomain write error:', (err as Error).message));
+
     return { domainRecord: record, rawSecret: creds.rawSecret };
   }
 
@@ -681,12 +424,19 @@ class SecurityStore {
     const idx = this.data.domains.findIndex((d) => d.id === id);
     if (idx === -1) throw new Error('Domain not found: ' + id);
 
+    const nowIso = new Date().toISOString();
     this.data.domains[idx] = {
       ...this.data.domains[idx],
       ...updates,
-      updatedAt: new Date().toISOString(),
+      updatedAt: nowIso,
     };
     this.saveData();
+
+    getDatabase().then(async (db) => {
+      if (!db) return;
+      await db.collection('authorized_domains').updateOne({ id }, { $set: { ...updates, updatedAt: nowIso } });
+    }).catch((err) => console.warn('[MongoDB] updateDomain error:', (err as Error).message));
+
     return this.data.domains[idx];
   }
 
@@ -695,10 +445,11 @@ class SecurityStore {
     if (!domain) throw new Error('Domain not found: ' + domainId);
 
     const creds = generateClientCredentials();
+    const nowIso = new Date().toISOString();
     domain.clientId = creds.clientId;
     domain.clientSecretHash = creds.secretHash;
     domain.clientSecretPrefix = creds.secretPrefix;
-    domain.updatedAt = new Date().toISOString();
+    domain.updatedAt = nowIso;
 
     // Update associated client
     const client = this.data.clients.find((c) => c.domainId === domainId);
@@ -708,6 +459,28 @@ class SecurityStore {
     }
 
     this.saveData();
+
+    getDatabase().then(async (db) => {
+      if (!db) return;
+      await db.collection('authorized_domains').updateOne(
+        { id: domainId },
+        {
+          $set: {
+            clientId: creds.clientId,
+            clientSecretHash: creds.secretHash,
+            clientSecretPrefix: creds.secretPrefix,
+            updatedAt: nowIso,
+          },
+        }
+      );
+      if (client) {
+        await db.collection('api_clients').updateOne(
+          { domainId },
+          { $set: { clientId: creds.clientId, status: 'ACTIVE' } }
+        );
+      }
+    }).catch((err) => console.warn('[MongoDB] rotateClientSecret error:', (err as Error).message));
+
     return { newRawSecret: creds.rawSecret, domainRecord: domain };
   }
 
@@ -715,10 +488,18 @@ class SecurityStore {
     const idx = this.data.domains.findIndex((d) => d.id === id);
     if (idx === -1) throw new Error('Domain not found');
 
-    const domain = this.data.domains[idx];
     this.data.domains.splice(idx, 1);
     this.data.clients = this.data.clients.filter((c) => c.domainId !== id);
     this.saveData();
+
+    // Immediately remove from MongoDB so it never reappears
+    getDatabase().then(async (db) => {
+      if (!db) return;
+      await Promise.all([
+        db.collection('authorized_domains').deleteOne({ id }),
+        db.collection('api_clients').deleteMany({ domainId: id }),
+      ]);
+    }).catch((err) => console.warn('[MongoDB] deleteDomain error:', (err as Error).message));
   }
 
   // --- CLIENTS ---
@@ -741,6 +522,15 @@ class SecurityStore {
     }
 
     this.saveData();
+
+    getDatabase().then(async (db) => {
+      if (!db) return;
+      await Promise.all([
+        db.collection('api_clients').updateOne({ clientId }, { $set: { status: 'REVOKED' } }),
+        domain ? db.collection('authorized_domains').updateOne({ id: domain.id }, { $set: { status: 'DISABLED' } }) : Promise.resolve(),
+      ]);
+    }).catch((err) => console.warn('[MongoDB] revokeClient error:', (err as Error).message));
+
     return client;
   }
 
@@ -922,6 +712,12 @@ class SecurityStore {
     }
 
     this.saveData();
+
+    getDatabase().then(async (db) => {
+      if (!db) return;
+      await db.collection('blocked_ips').updateOne({ ip: record.ip }, { $set: record }, { upsert: true });
+    }).catch((err) => console.warn('[MongoDB] blockIp error:', (err as Error).message));
+
     return record;
   }
 
@@ -934,6 +730,12 @@ class SecurityStore {
     this.data.blockedIps = this.data.blockedIps.filter((b) => b.ip !== ip);
     ipCooldowns.delete(ip);
     this.saveData();
+
+    getDatabase().then(async (db) => {
+      if (!db) return;
+      await db.collection('blocked_ips').deleteOne({ ip });
+    }).catch((err) => console.warn('[MongoDB] unblockIp error:', (err as Error).message));
+
     this.addAuditLog({
       admin,
       action: 'IP_UNBLOCKED',
@@ -978,6 +780,16 @@ class SecurityStore {
       ...updates,
     };
     this.saveData();
+
+    getDatabase().then(async (db) => {
+      if (!db) return;
+      await db.collection('system_settings').updateOne(
+        { _id: 'global_settings' as any },
+        { $set: { ...this.data.settings, updatedAt: new Date().toISOString() } },
+        { upsert: true }
+      );
+    }).catch((err) => console.warn('[MongoDB] updateSettings error:', (err as Error).message));
+
     return this.data.settings;
   }
 

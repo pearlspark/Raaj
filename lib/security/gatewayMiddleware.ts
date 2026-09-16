@@ -79,6 +79,83 @@ function extractClientIp(req: NextRequest): { ip: string; country: string; regio
 }
 
 /**
+ * Deep Inspection for Malicious Injections and Exploit Probes
+ */
+function detectMaliciousPayload(url: string, userAgent: string): { detected: boolean; reason?: string } {
+  let decodedUrl = '';
+  try {
+    decodedUrl = decodeURIComponent(url).toLowerCase();
+  } catch {
+    decodedUrl = url.toLowerCase();
+  }
+
+  // 1. SQL Injection Signatures
+  const sqliPatterns = [
+    /union\s+(all\s+)?select/i,
+    /(\%27)|(\')|(\-\-)|(\%23)|(#)/i,
+    /waitfor\s+delay/i,
+    /exec(\s|\+)+(s|x)p\w+/i,
+    /benchmark\s*\(/i,
+    /sleep\s*\(\s*[0-9]+\s*\)/i,
+    /or\s+['"]?1['"]?\s*=\s*['"]?1/i,
+    /drop\s+table/i,
+    /insert\s+into/i,
+  ];
+  for (const p of sqliPatterns) {
+    if (p.test(decodedUrl)) {
+      return { detected: true, reason: 'SQL Injection pattern detected in request' };
+    }
+  }
+
+  // 2. NoSQL Operator Injections
+  const nosqlPatterns = [
+    /\$where/i,
+    /\$regex/i,
+    /\$gt/i,
+    /\$ne/i,
+    /\[\$(gt|gte|lt|lte|ne|regex|in|nin)\]/i,
+  ];
+  for (const p of nosqlPatterns) {
+    if (p.test(decodedUrl)) {
+      return { detected: true, reason: 'NoSQL Operator Injection detected in request parameters' };
+    }
+  }
+
+  // 3. Path Traversal & System Probing
+  const traversalPatterns = [
+    /\.\.\//,
+    /\.\.\\/,
+    /%2e%2e[\/\\]/i,
+    /\/etc\/passwd/i,
+    /\/proc\/self/i,
+    /win\.ini/i,
+    /boot\.ini/i,
+    /\.env(\.|$)/i,
+    /\.git(\/|$)/i,
+    /wp-admin/i,
+    /wp-login/i,
+    /phpmyadmin/i,
+    /\/actuator/i,
+  ];
+  for (const p of traversalPatterns) {
+    if (p.test(decodedUrl)) {
+      return { detected: true, reason: 'System directory traversal or vulnerability probe detected' };
+    }
+  }
+
+  // 4. Automated Exploit Scanners User-Agent
+  const uaLower = userAgent.toLowerCase();
+  const hostileAgents = ['sqlmap', 'nikto', 'burp', 'dirbuster', 'gobuster', 'masscan', 'zgrab', 'nmap'];
+  for (const agent of hostileAgents) {
+    if (uaLower.includes(agent)) {
+      return { detected: true, reason: `Hostile vulnerability scanner detected (${agent})` };
+    }
+  }
+
+  return { detected: false };
+}
+
+/**
  * Gateway Security Guard function for API routes
  */
 export async function runSecurityGuard(
@@ -100,6 +177,56 @@ export async function runSecurityGuard(
   const method = req.method;
 
   const settings = securityStore.getSettings();
+
+  // 0. Active Exploit / Injection Payload Inspection (Hacker-Proof Shield)
+  const fullUrl = req.url || '';
+  const maliciousCheck = detectMaliciousPayload(fullUrl, userAgent);
+  if (maliciousCheck.detected) {
+    // Instantly put attacker IP into high-security cooldown
+    securityStore.setTemporaryIpCooldown(ip, settings.autoBlockDurationMinutes || 60);
+    securityStore.addSecurityEvent({
+      severity: 'CRITICAL',
+      type: 'INJECTION_ATTACK_DETECTED',
+      ip,
+      endpoint: pathname,
+      reason: maliciousCheck.reason || 'Exploit payload detected',
+      actionTaken: 'Connection terminated with 403. Attacker IP quarantined.',
+      requestId,
+    });
+    securityStore.addRequestLog({
+      id: 'log_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+      requestId,
+      timestamp: new Date().toISOString(),
+      ip,
+      country,
+      region,
+      city,
+      userAgent,
+      origin: originHeader,
+      referer: refererHeader,
+      clientId: 'quarantined',
+      domain: incomingClientHost || 'malicious-probe',
+      endpoint: pathname,
+      method,
+      statusCode: 403,
+      responseTimeMs: Date.now() - startTime,
+      responseSizeBytes: 110,
+      riskScore: 100,
+      riskFactors: ['Active Exploit Payload', 'Security Barrier Tripped'],
+      blocked: true,
+      blockReason: maliciousCheck.reason,
+    });
+
+    return {
+      allowed: false,
+      response: createSecurityErrorResponse(
+        403,
+        'MALICIOUS_REQUEST_REJECTED',
+        `Security Barrier: ${maliciousCheck.reason}. Request blocked and IP logged.`,
+        requestId
+      ),
+    };
+  }
 
   // 1. IP Blocklist & Cooldown Check
   const ipCheck = securityStore.isIpBlocked(ip);
@@ -315,16 +442,25 @@ export async function runSecurityGuard(
     }
   }
 
-  // Allow same-origin / preview if running on the platform host or localhost in dev
+  // Allow same-origin / preview ONLY for verified localhost dev or authentic same-origin browser sessions
   const reqHost = req.headers.get('host') || '';
-  if (!isAuthorizedDomain && (reqHost.includes('run.app') || reqHost.includes('localhost'))) {
-    // Check if localhost/current dev host is allowed in settings
-    if (settings.allowLocalhostTesting) {
+  const secFetchSite = req.headers.get('sec-fetch-site');
+  const isLocalIp = ip === '127.0.0.1' || ip === '::1';
+
+  if (!isAuthorizedDomain) {
+    if (settings.allowLocalhostTesting && isLocalIp) {
       isAuthorizedDomain = true;
       authMethod = 'ORIGIN';
-      const localDom = securityStore.getDomains().find((d) => d.normalizedDomain.includes('localhost') || d.mode === 'EXACT');
+      const localDom = securityStore.getDomains().find((d) => d.normalizedDomain.includes('localhost'));
       matchedDomainRecord = localDom;
-      validatedClientId = localDom?.clientId || 'client_preview_dev';
+      validatedClientId = localDom?.clientId || 'client_local_preview';
+    } else if (secFetchSite === 'same-origin' && reqHost && (originHeader.includes(reqHost) || refererHeader.includes(reqHost))) {
+      // Legitimate browser user navigating within the deployed application host
+      isAuthorizedDomain = true;
+      authMethod = 'ORIGIN';
+      const localDom = securityStore.getDomains().find((d) => d.normalizedDomain === reqHost || d.normalizedDomain === 'localhost');
+      matchedDomainRecord = localDom;
+      validatedClientId = localDom?.clientId || 'client_same_origin';
     }
   }
 
@@ -540,4 +676,46 @@ export function finalizeSecurityResponse(
   });
 
   return res;
+}
+
+/**
+ * Handle CORS preflight OPTIONS requests securely
+ * Only grants Access-Control-Allow-Origin to active authorized domains or same-origin host
+ */
+export function createSecurityOptionsResponse(req: NextRequest): NextResponse {
+  const origin = req.headers.get('origin');
+  let allowedOrigin: string | null = null;
+
+  if (origin) {
+    const allDomains = securityStore.getDomains();
+    for (const d of allDomains) {
+      const match = isDomainAuthorized(origin, d);
+      if (match.matched) {
+        allowedOrigin = origin;
+        break;
+      }
+    }
+    const reqHost = req.headers.get('host');
+    if (!allowedOrigin && reqHost && origin.includes(reqHost)) {
+      allowedOrigin = origin;
+    }
+  }
+
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-ID, X-Timestamp, X-Nonce, X-Signature, X-Request-ID',
+    'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin',
+    'X-Content-Type-Options': 'nosniff',
+  };
+
+  if (allowedOrigin) {
+    headers['Access-Control-Allow-Origin'] = allowedOrigin;
+    headers['Access-Control-Allow-Credentials'] = 'true';
+  } else {
+    // Zero-trust: do NOT reflect unknown origins on CORS preflight
+    headers['Access-Control-Allow-Origin'] = 'null';
+  }
+
+  return new NextResponse(null, { status: 204, headers });
 }

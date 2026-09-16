@@ -13,7 +13,6 @@ import { TestingSuite } from './TestingSuite';
 import { SettingsView } from './SettingsView';
 import { AuditLogsView } from './AuditLogsView';
 import { IntegrationGuide } from './IntegrationGuide';
-import { EduAppView } from '../player/EduAppView';
 import { GlassShieldIcon, LiquidLockIcon } from '../ui/PremiumIcons';
 import { User, AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react';
 
@@ -336,7 +335,6 @@ export default function AdminConsole() {
           )}
           {activeTab === 'audit' && <AuditLogsView auditLogs={auditLogs} />}
           {activeTab === 'integration' && <IntegrationGuide />}
-          {activeTab === 'edu-preview' && <EduAppView />}
         </main>
       </div>
     </div>

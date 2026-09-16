@@ -131,11 +131,5 @@ export function extractClientDomain(headers: Headers | Record<string, string | s
     }
   }
 
-  // If host header is present and request is direct
-  const host = getHeader('host');
-  if (host) {
-    return host;
-  }
-
   return null;
 }

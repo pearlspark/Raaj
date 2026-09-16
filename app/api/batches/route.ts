@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { runSecurityGuard, finalizeSecurityResponse } from '@/lib/security/gatewayMiddleware';
+import { runSecurityGuard, finalizeSecurityResponse, createSecurityOptionsResponse } from '@/lib/security/gatewayMiddleware';
 import { getBatchesFromLocal } from '@/lib/services/pwService';
 
 export async function GET(req: NextRequest) {
@@ -19,13 +19,5 @@ export async function GET(req: NextRequest) {
 }
 
 export async function OPTIONS(req: NextRequest) {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': req.headers.get('origin') || '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-ID, X-Timestamp, X-Nonce, X-Signature, X-Request-ID',
-      'Access-Control-Max-Age': '86400',
-    },
-  });
+  return createSecurityOptionsResponse(req);
 }
