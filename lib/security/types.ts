@@ -96,6 +96,25 @@ export interface AdminAuditLog {
   result: 'SUCCESS' | 'FAILURE';
 }
 
+export interface ProtectedApiRoute {
+  id: string;
+  name: string;
+  upstreamUrl: string; // Target API URL e.g. "https://web-production-bcc00.up.railway.app/api/batches"
+  slug: string; // Proxy slug e.g. "/api/batches"
+  methods: string[]; // e.g. ['GET', 'POST'] or ['ALL']
+  encryptionEnabled: boolean; // default true
+  encryptionKey?: string; // custom key or empty to inherit master key
+  rateLimitPerMin: number; // default 60
+  status: 'ACTIVE' | 'DISABLED';
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+  lastLatencyMs?: number;
+  lastAccessedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface SystemSettings {
   riskThresholds: {
     medium: number; // default 30
@@ -121,6 +140,7 @@ export interface SystemSettings {
   clockSkewSeconds: number;
   upstreamBaseUrl: string;
   allowLocalhostTesting: boolean;
+  masterEncryptionKey: string;
 }
 
 export interface TokenPayload {

@@ -13,6 +13,7 @@ import { TestingSuite } from './TestingSuite';
 import { SettingsView } from './SettingsView';
 import { AuditLogsView } from './AuditLogsView';
 import { IntegrationGuide } from './IntegrationGuide';
+import { AddApiManager } from './AddApiManager';
 import { GlassShieldIcon, LiquidLockIcon } from '../ui/PremiumIcons';
 import { User, AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react';
 
@@ -311,6 +312,7 @@ export default function AdminConsole() {
           {activeTab === 'overview' && (
             <OverviewDashboard metrics={metrics} onNavigate={setActiveTab} />
           )}
+          {activeTab === 'add-apis' && <AddApiManager />}
           {activeTab === 'live' && <LiveMonitor onBlockIp={handleBlockIpDirect} />}
           {activeTab === 'domains' && (
             <DomainManager domains={domains} clients={clients} onRefresh={loadDashboardData} />

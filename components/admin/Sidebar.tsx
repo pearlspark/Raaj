@@ -8,6 +8,7 @@ import {
   DefenseMatrixIcon,
   GlassShieldIcon,
   QuantumCpuIcon,
+  LiquidLockIcon,
 } from '../ui/PremiumIcons';
 import {
   LayoutDashboard,
@@ -16,6 +17,7 @@ import {
   Sliders,
   History,
   BookOpen,
+  PlusCircle,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -30,6 +32,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, badgeCounts }) => {
   const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, isCustom: false },
+    { id: 'add-apis', label: 'Add APIs (Proxy & Crypt)', icon: LiquidLockIcon, isCustom: true },
     { id: 'live', label: 'Live Monitor', icon: PulseRadarIcon, isCustom: true, pulse: true },
     { id: 'domains', label: 'Authorized Domains', icon: LiquidGlobeIcon, isCustom: true },
     { id: 'clients', label: 'API Clients & Keys', icon: CrystalKeyIcon, isCustom: true },

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import {
   DomainRecord,
   ApiClientRecord,
@@ -9,8 +10,9 @@ import {
   AdminAuditLog,
   SystemSettings,
   Severity,
+  ProtectedApiRoute,
 } from './types';
-import { generateClientCredentials, hashAdminPassword, hashSecret } from './crypto';
+import { generateClientCredentials, hashAdminPassword, hashSecret, generateEncryptionKey } from './crypto';
 import { normalizeDomain } from './domainGuard';
 import { getDatabase } from '@/lib/db/mongodb';
 
@@ -22,6 +24,7 @@ interface StoreData {
   blockedIps: BlockedIP[];
   auditLogs: AdminAuditLog[];
   settings: SystemSettings;
+  protectedApis: ProtectedApiRoute[];
   adminUsers: {
     id: string;
     username: string;
@@ -65,6 +68,7 @@ const DEFAULT_SETTINGS: SystemSettings = {
   clockSkewSeconds: 300,
   upstreamBaseUrl: process.env.PW_BASE_URL || 'https://api.penpencil.co',
   allowLocalhostTesting: true,
+  masterEncryptionKey: process.env.API_RESPONSE_ENCRYPTION_KEY || 'sec_8f49ad20e5c10b7b659c21ef458a01cd79a0b12c',
 };
 
 class SecurityStore {
@@ -107,11 +111,12 @@ class SecurityStore {
       ]);
 
       // 2. Fetch authoritative real records from MongoDB
-      const [remoteDomains, remoteClients, remoteSettings, remoteBlockedIps] = await Promise.all([
+      const [remoteDomains, remoteClients, remoteSettings, remoteBlockedIps, remoteProtectedApis] = await Promise.all([
         db.collection('authorized_domains').find({}).toArray().catch(() => []),
         db.collection('api_clients').find({}).toArray().catch(() => []),
         db.collection('system_settings').findOne({ _id: 'global_settings' as any }).catch(() => null),
         db.collection('blocked_ips').find({}).toArray().catch(() => []),
+        db.collection('protected_apis').find({}).toArray().catch(() => []),
       ]);
 
       // Load remote data - MongoDB is the source of truth
@@ -129,6 +134,13 @@ class SecurityStore {
         this.data.blockedIps = remoteBlockedIps.map((rb: any) => {
           const { _id, ...ipData } = rb;
           return ipData as BlockedIP;
+        });
+      }
+
+      if (remoteProtectedApis && remoteProtectedApis.length > 0) {
+        this.data.protectedApis = remoteProtectedApis.map((ra: any) => {
+          const { _id, ...apiData } = ra;
+          return apiData as ProtectedApiRoute;
         });
       }
 
@@ -181,6 +193,16 @@ class SecurityStore {
         );
       }
 
+      if (this.data.protectedApis && this.data.protectedApis.length > 0) {
+        for (const api of this.data.protectedApis) {
+          await db.collection('protected_apis').updateOne(
+            { id: api.id },
+            { $set: api },
+            { upsert: true }
+          );
+        }
+      }
+
       await db.collection('system_settings').updateOne(
         { _id: 'global_settings' as any },
         { $set: { ...this.data.settings, updatedAt: new Date().toISOString() } },
@@ -220,6 +242,7 @@ class SecurityStore {
           ...parsed,
           domains: cleanDomains,
           clients: cleanClients,
+          protectedApis: parsed.protectedApis || [],
           settings: { ...DEFAULT_SETTINGS, ...(parsed.settings || {}) },
         };
       }
@@ -263,6 +286,7 @@ class SecurityStore {
       securityEvents: [],
       blockedIps: [],
       auditLogs: [],
+      protectedApis: [],
       settings: DEFAULT_SETTINGS,
       adminUsers,
     };
@@ -956,6 +980,106 @@ class SecurityStore {
       topCountries,
       chartData: chartBuckets,
     };
+  }
+
+  // --- PROTECTED APIS MANAGEMENT ---
+  public getProtectedApis(): ProtectedApiRoute[] {
+    return [...(this.data.protectedApis || [])];
+  }
+
+  public getProtectedApi(id: string): ProtectedApiRoute | undefined {
+    return (this.data.protectedApis || []).find((a) => a.id === id);
+  }
+
+  public getProtectedApiBySlug(slug: string): ProtectedApiRoute | undefined {
+    const raw = (slug || '').trim().split('?')[0];
+    const normalized = raw.startsWith('/') ? raw.toLowerCase() : `/${raw.toLowerCase()}`;
+    return (this.data.protectedApis || []).find((a) => {
+      const aSlug = a.slug.trim().split('?')[0];
+      const apiSlug = aSlug.startsWith('/') ? aSlug.toLowerCase() : `/${aSlug.toLowerCase()}`;
+      return apiSlug === normalized;
+    });
+  }
+
+  public addProtectedApi(
+    entry: Omit<ProtectedApiRoute, 'id' | 'createdAt' | 'updatedAt' | 'totalRequests' | 'successfulRequests' | 'failedRequests'>
+  ): ProtectedApiRoute {
+    const now = new Date().toISOString();
+    const rawSlug = (entry.slug || '').trim().split('?')[0];
+    const normalizedSlug = rawSlug.startsWith('/') ? rawSlug : `/${rawSlug}`;
+    const newApi: ProtectedApiRoute = {
+      id: 'api_' + crypto.randomBytes(8).toString('hex'),
+      name: entry.name?.trim() || normalizedSlug,
+      upstreamUrl: entry.upstreamUrl.trim(),
+      slug: normalizedSlug,
+      methods: entry.methods && entry.methods.length > 0 ? entry.methods : ['GET', 'POST'],
+      encryptionEnabled: entry.encryptionEnabled !== undefined ? entry.encryptionEnabled : true,
+      encryptionKey: entry.encryptionKey?.trim() || undefined,
+      rateLimitPerMin: entry.rateLimitPerMin || 60,
+      status: entry.status || 'ACTIVE',
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    if (!this.data.protectedApis) {
+      this.data.protectedApis = [];
+    }
+    this.data.protectedApis.unshift(newApi);
+    this.saveData();
+    this.syncToMongo().catch(() => {});
+    return newApi;
+  }
+
+  public updateProtectedApi(id: string, updates: Partial<ProtectedApiRoute>): ProtectedApiRoute | null {
+    if (!this.data.protectedApis) this.data.protectedApis = [];
+    const idx = this.data.protectedApis.findIndex((a) => a.id === id);
+    if (idx === -1) return null;
+    const current = this.data.protectedApis[idx];
+    let slug = current.slug;
+    if (updates.slug) {
+      const raw = updates.slug.trim().split('?')[0];
+      slug = raw.startsWith('/') ? raw : `/${raw}`;
+    }
+    const updated: ProtectedApiRoute = {
+      ...current,
+      ...updates,
+      slug,
+      updatedAt: new Date().toISOString(),
+    };
+    this.data.protectedApis[idx] = updated;
+    this.saveData();
+    this.syncToMongo().catch(() => {});
+    return updated;
+  }
+
+  public deleteProtectedApi(id: string): boolean {
+    if (!this.data.protectedApis) return false;
+    const initialLen = this.data.protectedApis.length;
+    this.data.protectedApis = this.data.protectedApis.filter((a) => a.id !== id);
+    if (this.data.protectedApis.length !== initialLen) {
+      this.saveData();
+      this.syncToMongo().catch(() => {});
+      return true;
+    }
+    return false;
+  }
+
+  public recordProtectedApiMetrics(id: string, success: boolean, latencyMs: number): void {
+    if (!this.data.protectedApis) return;
+    const api = this.data.protectedApis.find((a) => a.id === id);
+    if (!api) return;
+    api.totalRequests = (api.totalRequests || 0) + 1;
+    if (success) {
+      api.successfulRequests = (api.successfulRequests || 0) + 1;
+    } else {
+      api.failedRequests = (api.failedRequests || 0) + 1;
+    }
+    api.lastLatencyMs = latencyMs;
+    api.lastAccessedAt = new Date().toISOString();
+    this.saveData();
   }
 }
 

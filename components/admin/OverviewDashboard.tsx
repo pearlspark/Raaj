@@ -7,6 +7,7 @@ import {
   PulseRadarIcon,
   DefenseMatrixIcon,
   QuantumCpuIcon,
+  LiquidLockIcon,
 } from '../ui/PremiumIcons';
 import {
   Activity,
@@ -68,10 +69,17 @@ export const OverviewDashboard: React.FC<OverviewProps> = ({ metrics, onNavigate
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => onNavigate('add-apis')}
+            className="px-4 py-2.5 rounded-2xl text-xs font-semibold liquid-btn-primary text-white transition-all shadow-lg flex items-center gap-2 cursor-pointer"
+          >
+            <LiquidLockIcon size={16} />
+            <span>Add Protected API</span>
+          </button>
           <button
             onClick={() => onNavigate('domains')}
-            className="px-4 py-2.5 rounded-2xl text-xs font-semibold liquid-btn-primary text-white transition-all shadow-lg flex items-center gap-2 cursor-pointer"
+            className="px-4 py-2.5 rounded-2xl text-xs font-semibold liquid-btn-glass text-slate-200 transition-all flex items-center gap-2 cursor-pointer"
           >
             <LiquidGlobeIcon size={16} />
             <span>Manage Domains</span>

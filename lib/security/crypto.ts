@@ -198,3 +198,84 @@ export function verifyAdminPassword(password: string, hash: string, salt: string
     return false;
   }
 }
+
+/**
+ * 256-bit Key derivation from any passphrase/secret
+ */
+export function deriveKey32(secret: string): Buffer {
+  return crypto.createHash('sha256').update(secret || 'api-shield-enclave-key').digest();
+}
+
+/**
+ * Generate a new random 256-bit AES encryption key
+ */
+export function generateEncryptionKey(): string {
+  return 'sec_' + crypto.randomBytes(24).toString('hex');
+}
+
+/**
+ * Encrypt arbitrary payload into format:
+ * { "data": "<iv_hex>:<ciphertext_hex>" }
+ * Exactly as requested: 12-byte IV (24 hex characters) + AES-256-GCM ciphertext with auth tag
+ */
+export function encryptPayload(data: any, secretKey: string): { data: string } {
+  const plainText = typeof data === 'string' ? data : JSON.stringify(data);
+  const key = deriveKey32(secretKey);
+  const iv = crypto.randomBytes(12); // 12 bytes = 24 hex characters
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const encrypted = Buffer.concat([cipher.update(plainText, 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  const combinedCipher = Buffer.concat([encrypted, tag]);
+  return {
+    data: `${iv.toString('hex')}:${combinedCipher.toString('hex')}`,
+  };
+}
+
+/**
+ * Decrypt payload formatted as "iv:ciphertext"
+ */
+export function decryptPayload(encryptedPayload: string, secretKey: string): any {
+  if (!encryptedPayload || typeof encryptedPayload !== 'string') {
+    throw new Error('Invalid encrypted payload');
+  }
+  let cleanStr = encryptedPayload.trim();
+  // If user pasted full JSON {"data":"..."}
+  const jsonMatch = cleanStr.match(/"data"\s*:\s*"([^"]+)"/);
+  if (jsonMatch) {
+    cleanStr = jsonMatch[1];
+  }
+  const parts = cleanStr.split(':');
+  if (parts.length !== 2) {
+    throw new Error('Malformed encrypted format. Expected "<iv_hex>:<ciphertext_hex>"');
+  }
+  const [ivHex, cipherHex] = parts;
+  const key = deriveKey32(secretKey);
+  const iv = Buffer.from(ivHex, 'hex');
+  const cipherBuf = Buffer.from(cipherHex, 'hex');
+
+  // GCM mode: 12-byte IV (24 hex chars) and at least 16 bytes tag
+  if (iv.length === 12 && cipherBuf.length >= 16) {
+    const tag = cipherBuf.subarray(cipherBuf.length - 16);
+    const content = cipherBuf.subarray(0, cipherBuf.length - 16);
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+    decipher.setAuthTag(tag);
+    const decrypted = Buffer.concat([decipher.update(content), decipher.final()]);
+    const text = decrypted.toString('utf8');
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  } else {
+    // CBC fallback
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    const decrypted = Buffer.concat([decipher.update(cipherBuf), decipher.final()]);
+    const text = decrypted.toString('utf8');
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  }
+}
+
